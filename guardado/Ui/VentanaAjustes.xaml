@@ -88,10 +88,8 @@
             <StackPanel x:Name="panelComun">
                 <CheckBox x:Name="chkSoloCambios"
                           Content="Saltar la vuelta si el modelo no tiene cambios"/>
-                <CheckBox x:Name="chkAvisar" Margin="0,8,0,0"
-                          Content="Avisar en la barra de estado de Revit"/>
-                <TextBlock Style="{StaticResource Pie}" Margin="24,2,0,0"
-                           Text="Un renglon abajo a la izquierda mientras corre y al terminar. No abre ninguna ventana ni interrumpe nada."/>
+                <TextBlock Style="{StaticResource Pie}" Margin="24,8,0,0"
+                           Text="Corre en silencio: no abre ventanas ni interrumpe nada. Lo que hace queda anotado en la bitacora de aca abajo."/>
             </StackPanel>
         </GroupBox>
 

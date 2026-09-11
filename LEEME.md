@@ -41,42 +41,45 @@ sección siguiente.
 
 ## Por qué Windows desconfía del .exe
 
-`dsdsaaggr.exe` **no tiene firma digital**. Eso dispara dos mecanismos distintos, y
-conviene no confundirlos porque tienen solución distinta:
+`dsdsaaggr.exe` **no tiene firma digital**. Sin firma, Windows lo juzga por lo que hace, y
+ahí importa mucho qué APIs del sistema toca el binario.
 
-### SmartScreen — "Windows protegió su PC"
+### El caso que ya nos pasó
 
-Aparece cuando un ejecutable sin firma y sin reputación llega marcado como descargado de
-internet. Deja continuar: *Más información* → *Ejecutar de todas formas*.
+Durante un tiempo el instalador funcionó en todas las máquinas. De pronto empezó a saltar
+SmartScreen en unas y el Control inteligente de aplicaciones lo bloqueó de plano en otras.
 
-Se puede evitar sin firmar, de tres maneras:
+La causa no era el nombre del archivo, ni la marca de descarga, ni el tamaño. Era **una
+llamada a `user32.dll`**: el autoguardado escribía un aviso en la barra de estado de Revit
+usando `FindWindowEx` + `SetWindowText`. Buscar la ventana de otra aplicación y escribirle
+texto es, sin firma que lo respalde, indistinguible de un inyector de interfaz.
 
-- **Usando el script** en vez del exe.
-- **Evitando la marca de descarga**: si el archivo llega por carpeta de red, USB o
-  `git clone` en vez de por navegador o correo, SmartScreen no se activa. También se puede
-  quitar la marca a mano:
-  ```powershell
-  Unblock-File .\dsdsaaggr.exe
-  ```
-- **Firmando el exe**, que es la solución de fondo.
+Se comprobó comparando los binarios:
 
-### Control inteligente de aplicaciones — "bloqueó esta aplicación"
+```
+dsdsaaggr.exe  (instalaba bien)   373 KB   APIs de user32: ninguna
+dsdsaaggr.exe  (instalaba bien)   397 KB   APIs de user32: ninguna
+dsdsaaggr.exe  (bloqueado)        499 KB   FindWindowEx, SetWindowText, UpdateWindow
+```
 
-Esto es otra cosa. Es una lista blanca de Windows 11: si el binario no está firmado por una
-autoridad que Microsoft reconozca, **lo bloquea y no da la opción de continuar**.
+Se quitó esa función. El autoguardado ahora corre en silencio y deja constancia en su
+bitácora. **Regla para lo que venga: mientras el ejecutable no esté firmado, ningún
+complemento debe llamar a APIs de Windows de manipulación de ventanas, procesos o memoria.**
 
-**No hay ningún ajuste de compilación, manifiesto ni metadato que lo evite.** Es
-exactamente su función. Las únicas salidas reales son:
+### Los dos mecanismos, si vuelve a pasar
 
-1. **Usar el script** (`instalar.ps1`). El Control inteligente no filtra scripts.
-2. **Firmar el ejecutable** con un certificado de firma de código.
-3. Apagar el Control inteligente en ese equipo — y ojo, **es de una sola vía**: una vez
-   apagado no se puede volver a encender sin reinstalar Windows. No lo recomiendo.
+**SmartScreen** — "Windows protegió su PC". Deja continuar: *Más información* → *Ejecutar de
+todas formas*. Se dispara con binarios sin firma, sin reputación, y marcados como
+descargados de internet. Para quitar esa marca:
 
-> En la versión anterior de estas herramientas esto no pasaba porque la instalación era un
-> `.ps1`. El aviso apareció al empaquetar todo en un único `.exe`.
+```powershell
+Unblock-File .\dsdsaaggr.exe
+```
 
----
+**Control inteligente de aplicaciones** — "bloqueó esta aplicación". Es una lista blanca de
+Windows 11 y **no da la opción de continuar**. No hay ajuste de compilación que lo evite.
+Las salidas son: usar `instalar.ps1`, firmar el ejecutable, o apagarlo en ese equipo — y ojo,
+apagarlo es de una sola vía, no se puede volver a encender sin reinstalar Windows.
 
 ## Firmar el ejecutable
 

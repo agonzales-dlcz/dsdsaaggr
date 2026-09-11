@@ -35,7 +35,6 @@ namespace Riga.Guardado.Ui
             chkLiberar.IsChecked = a.LiberarPrestados;
             txtComentario.Text = a.Comentario;
             chkSoloCambios.IsChecked = a.SoloSiHayCambios;
-            chkAvisar.IsChecked = a.AvisoBarra;
 
             _cargando = false;
             AjustarHabilitados();
@@ -98,7 +97,7 @@ namespace Riga.Guardado.Ui
 
             btLocalYa.IsEnabled = false;
             btSyncYa.IsEnabled = false;
-            try { Reloj.Correr(_uiapp, accion, false); }
+            try { Reloj.Correr(_uiapp, accion); }
             finally
             {
                 btLocalYa.IsEnabled = true;
@@ -126,7 +125,6 @@ namespace Riga.Guardado.Ui
                 MinutosSync = sync,
                 LiberarPrestados = chkLiberar.IsChecked == true,
                 Comentario = txtComentario.Text,
-                AvisoBarra = chkAvisar.IsChecked == true,
                 SoloSiHayCambios = chkSoloCambios.IsChecked == true
             };
             a.Normalizar();

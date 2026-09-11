@@ -23,8 +23,18 @@
 // Nada de lo de aca puede dejar escapar una excepcion: una excepcion suelta en Idling se
 // come Revit entero.
 //
-// Y nada de lo de aca abre una ventana. Un cartel modal en medio del trabajo es peor que el
-// problema que resuelve: lo unico que se ve es un renglon en la barra de estado.
+// Y nada de lo de aca se ve. Ni ventana ni renglon en la barra de estado.
+//
+// Hubo una version que escribia un aviso en la barra de estado de Revit. Para eso hay que
+// buscar el control por su clase de Win32 y mandarle el texto: FindWindowEx + SetWindowText.
+// El problema es que eso es, literalmente, la firma de un inyector de interfaz, y en un
+// instalador sin firma digital hizo que SmartScreen empezara a avisar y que el Control
+// inteligente de aplicaciones lo bloqueara de plano en varias maquinas. Verificado
+// comparando los binarios: las versiones que instalaban bien no importan NINGUNA api de
+// user32; la que empezo a fallar importaba esas tres.
+//
+// Un renglon informativo no vale que la herramienta no se pueda instalar. Lo que pasa queda
+// en la bitacora, que para eso esta.
 
 using System;
 using Autodesk.Revit.UI;
@@ -139,7 +149,7 @@ namespace Riga.Guardado.Nucleo
                 var accion = tocaSync ? Accion.Sync : Accion.Local;
 
                 _ocupado = true;
-                try { Correr(uiapp, accion, true); }
+                try { Correr(uiapp, accion); }
                 finally { _ocupado = false; }
             }
             catch (Exception ex)
@@ -150,13 +160,8 @@ namespace Riga.Guardado.Nucleo
             }
         }
 
-        /// <summary>
-        /// Corre una accion.
-        ///
-        /// No abre ninguna ventana. Lo unico que se ve es un renglon en la barra de estado de
-        /// Revit, abajo a la izquierda, y solo si el aviso esta activado.
-        /// </summary>
-        public static void Correr(UIApplication uiapp, Accion accion, bool automatica)
+        /// <summary>Corre una accion. En silencio: lo que pasa queda en la bitacora.</summary>
+        public static void Correr(UIApplication uiapp, Accion accion)
         {
             var uidoc = uiapp == null ? null : uiapp.ActiveUIDocument;
             var doc = uidoc == null ? null : uidoc.Document;
@@ -168,17 +173,10 @@ namespace Riga.Guardado.Nucleo
                 return;
             }
 
-            bool avisar = automatica && Cfg.AvisoBarra;
-            if (avisar)
-                BarraEstado.Decir(accion == Accion.Sync
-                    ? "Autoguardado: guardando y sincronizando con la central..."
-                    : "Autoguardado: guardando...");
-
             try
             {
                 var r = Tarea.Ejecutar(uiapp, Cfg, accion);
                 Anotar(Etiqueta(accion) + r.Texto + "  [" + doc.Title + "]");
-                if (avisar) BarraEstado.Decir("Autoguardado " + DateTime.Now.ToString("HH:mm") + ": " + r.Texto);
 
                 Vencido(accion);
                 // La sincronizacion ya dejo la local guardada: su contador vuelve a cero.
@@ -188,13 +186,10 @@ namespace Riga.Guardado.Nucleo
             {
                 Posponer(2, accion);
                 Anotar("la central estaba ocupada, reintento en 2 min");
-                if (avisar) BarraEstado.Decir("Autoguardado: la central estaba ocupada, reintento en 2 min");
             }
             catch (Exception ex)
             {
-                string r = "fallo: " + ex.GetType().Name + ": " + ex.Message;
-                Anotar(Etiqueta(accion) + r);
-                if (avisar) BarraEstado.Decir("Autoguardado: " + r);
+                Anotar(Etiqueta(accion) + "fallo: " + ex.GetType().Name + ": " + ex.Message);
                 Vencido(accion);
             }
         }

@@ -33,7 +33,6 @@ namespace Riga.Guardado.Nucleo
         public bool Sincronizar = false;
         public int MinutosSync = 60;
 
-        public bool AvisoBarra = true;           // un renglon en la barra de estado, sin bloquear
         public bool SoloSiHayCambios = true;
         public bool LiberarPrestados = false;    // por defecto no suelta lo que estas editando
         public string Comentario = "Sincronizacion automatica";
@@ -65,7 +64,6 @@ namespace Riga.Guardado.Nucleo
                 MinutosLocal = MinutosLocal,
                 Sincronizar = Sincronizar,
                 MinutosSync = MinutosSync,
-                AvisoBarra = AvisoBarra,
                 SoloSiHayCambios = SoloSiHayCambios,
                 LiberarPrestados = LiberarPrestados,
                 Comentario = Comentario
@@ -107,7 +105,6 @@ namespace Riga.Guardado.Nucleo
                 a.Activo = Bool(d, "activo", a.Activo);
                 a.GuardarLocal = Bool(d, "guardar_local", a.GuardarLocal);
                 a.Sincronizar = Bool(d, "sincronizar", a.Sincronizar);
-                a.AvisoBarra = Bool(d, "aviso_barra", a.AvisoBarra);
                 a.SoloSiHayCambios = Bool(d, "solo_si_hay_cambios", a.SoloSiHayCambios);
                 a.LiberarPrestados = Bool(d, "liberar_prestados", a.LiberarPrestados);
                 if (d.ContainsKey("comentario")) a.Comentario = d["comentario"];
@@ -137,7 +134,6 @@ namespace Riga.Guardado.Nucleo
                 sb.AppendLine("minutos_local=" + MinutosLocal.ToString(CultureInfo.InvariantCulture));
                 sb.AppendLine("sincronizar=" + (Sincronizar ? "1" : "0"));
                 sb.AppendLine("minutos_sync=" + MinutosSync.ToString(CultureInfo.InvariantCulture));
-                sb.AppendLine("aviso_barra=" + (AvisoBarra ? "1" : "0"));
                 sb.AppendLine("solo_si_hay_cambios=" + (SoloSiHayCambios ? "1" : "0"));
                 sb.AppendLine("liberar_prestados=" + (LiberarPrestados ? "1" : "0"));
                 sb.AppendLine("comentario=" + Comentario.Replace("\r", " ").Replace("\n", " "));
