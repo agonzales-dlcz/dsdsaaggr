@@ -1,0 +1,76 @@
+<Window x:Class="Riga.Sectores.Ui.VentanaParametrizar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Parametrizar sectores" Height="660" Width="960"
+        MinHeight="520" MinWidth="780"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        FontFamily="Segoe UI" FontSize="12" Background="#F0F0F0">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Margin="0,0,0,8" FontSize="15" FontWeight="SemiBold" Foreground="#333"
+                   Text="Escribir Sector y Nivel del elemento segun el JSON"/>
+
+        <GroupBox Grid.Row="1" Header="Archivo de sectores" Background="White" Padding="8"
+                  Margin="0,0,0,8">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="..." Width="32" Margin="6,0,0,0"
+                        Click="Examinar_Click"/>
+                <TextBox x:Name="txJson" Padding="3,2" IsReadOnly="True"/>
+            </DockPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="2" Header="En que parametro se escribe" Background="White" Padding="8"
+                  Margin="0,0,0,8">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="El Sector va a" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" x:Name="cbSector" Margin="6,0,20,0" IsEditable="True"/>
+                    <Label Grid.Column="2" Content="El Nivel del elemento va a" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="3" x:Name="cbNivel" Margin="6,0,0,0" IsEditable="True"/>
+                </Grid>
+                <TextBlock Margin="0,6,0,0" Foreground="#666" TextWrapping="Wrap"
+                           Text="Se listan los parametros de texto que se pueden escribir, mirando una muestra de elementos del modelo. Si el tuyo no aparece, podes escribir el nombre a mano."/>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Header="Sectores del archivo" Background="White" Padding="4">
+            <DataGrid x:Name="grilla" AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserAddRows="False" HeadersVisibility="Column" RowHeaderWidth="0"
+                      GridLinesVisibility="All" VerticalGridLinesBrush="#E0E0E0"
+                      HorizontalGridLinesBrush="#E0E0E0" AlternatingRowBackground="#FAFAFA"
+                      RowHeight="24" BorderThickness="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Sector" Binding="{Binding Sector}" Width="1.4*"/>
+                    <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="1*"/>
+                    <DataGridTextColumn Header="z min (mm)" Binding="{Binding ZMin, StringFormat=N1}" Width="120"/>
+                    <DataGridTextColumn Header="z max (mm)" Binding="{Binding ZMax, StringFormat=N1}" Width="120"/>
+                    <DataGridTextColumn Header="Vertices" Binding="{Binding Vertices}" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <DockPanel Grid.Row="4" Margin="0,10,0,0">
+            <TextBlock DockPanel.Dock="Left" x:Name="lbResumen" VerticalAlignment="Center" Foreground="#444"/>
+            <Button DockPanel.Dock="Right" Content="Cerrar" MinWidth="90" Padding="12,5"
+                    Margin="6,0,0,0" x:Name="btCerrar" Click="Cerrar_Click"/>
+            <Button DockPanel.Dock="Right" x:Name="btCorrer" Content="Parametrizar" MinWidth="140"
+                    Padding="12,5" Margin="6,0,0,0" FontWeight="SemiBold" IsEnabled="False"
+                    Click="Correr_Click"/>
+            <TextBlock/>
+        </DockPanel>
+    </Grid>
+</Window>

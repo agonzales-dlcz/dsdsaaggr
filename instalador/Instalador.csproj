@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>dsdsaaggr</AssemblyName>
+    <RootNamespace>Riga.Instalador</RootNamespace>
+    <!-- Main propio: ver la nota en Programa.cs. -->
+    <StartupObject>Riga.Instalador.Programa</StartupObject>
+
+    <!--
+      Metadatos de verdad, no los de relleno que el SDK arma con el nombre del ensamblado.
+      Un binario sin autor ni descripcion le suma sospecha a SmartScreen.
+      Aclaracion honesta: esto NO alcanza para que deje de avisar. Lo unico que saca el
+      aviso es una firma digital de una autoridad que Microsoft reconozca. Ver LEEME.md.
+    -->
+    <Company>Ayrton Gonzales</Company>
+    <Authors>Ayrton Gonzales</Authors>
+    <Product>dsdsaaggr</Product>
+    <AssemblyTitle>Herramientas dsdsaaggr para Revit 2025</AssemblyTitle>
+    <Description>Instala las herramientas dsdsaaggr para Autodesk Revit 2025 en la carpeta del usuario, sin permisos de administrador.</Description>
+    <Copyright>Copyright (c) 2026 Ayrton Gonzales</Copyright>
+    <Version>1.1.0</Version>
+    <FileVersion>1.1.0.0</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <NeutralLanguage>es</NeutralLanguage>
+
+    <!-- Un solo archivo, sin pedir permisos de administrador: todo va a %APPDATA%. -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <!-- Sin .pdb al lado: no aporta nada al usuario y ensucia la carpeta de entrega. -->
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <!--
+    Los addins van adentro del exe como recursos. Si alguno no esta compilado, esto falla
+    aca y no despues, que es lo que se quiere: no existe un instalador a medias.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\exportar_planos\bin\Release\ExportarPlanos.dll"                LogicalName="paquete/ExportarPlanos.dll" />
+    <EmbeddedResource Include="..\exportar_planos\bin\Release\ExportarPlanos.deps.json"          LogicalName="paquete/ExportarPlanos.deps.json" />
+    <EmbeddedResource Include="..\exportar_planos\bin\Release\ExportarPlanos.runtimeconfig.json" LogicalName="paquete/ExportarPlanos.runtimeconfig.json" />
+    <EmbeddedResource Include="..\exportar_planos\bin\Release\ExportarPlanos.addin"              LogicalName="paquete/ExportarPlanos.addin" />
+
+    <EmbeddedResource Include="..\exportar_tablas\bin\Release\ExportarTablas.dll"                LogicalName="paquete/ExportarTablas.dll" />
+    <EmbeddedResource Include="..\exportar_tablas\bin\Release\ExportarTablas.deps.json"          LogicalName="paquete/ExportarTablas.deps.json" />
+    <EmbeddedResource Include="..\exportar_tablas\bin\Release\ExportarTablas.runtimeconfig.json" LogicalName="paquete/ExportarTablas.runtimeconfig.json" />
+    <EmbeddedResource Include="..\exportar_tablas\bin\Release\ExportarTablas.addin"              LogicalName="paquete/ExportarTablas.addin" />
+
+    <EmbeddedResource Include="..\sectores\bin\Release\Sectores.dll"                LogicalName="paquete/Sectores.dll" />
+    <EmbeddedResource Include="..\sectores\bin\Release\Sectores.deps.json"          LogicalName="paquete/Sectores.deps.json" />
+    <EmbeddedResource Include="..\sectores\bin\Release\Sectores.runtimeconfig.json" LogicalName="paquete/Sectores.runtimeconfig.json" />
+    <EmbeddedResource Include="..\sectores\bin\Release\Sectores.addin"              LogicalName="paquete/Sectores.addin" />
+
+    <EmbeddedResource Include="..\vistas\bin\Release\Vistas.dll"                LogicalName="paquete/Vistas.dll" />
+    <EmbeddedResource Include="..\vistas\bin\Release\Vistas.deps.json"          LogicalName="paquete/Vistas.deps.json" />
+    <EmbeddedResource Include="..\vistas\bin\Release\Vistas.runtimeconfig.json" LogicalName="paquete/Vistas.runtimeconfig.json" />
+    <EmbeddedResource Include="..\vistas\bin\Release\Vistas.addin"              LogicalName="paquete/Vistas.addin" />
+
+    <EmbeddedResource Include="..\guardado\bin\Release\Guardado.dll"                LogicalName="paquete/Guardado.dll" />
+    <EmbeddedResource Include="..\guardado\bin\Release\Guardado.deps.json"          LogicalName="paquete/Guardado.deps.json" />
+    <EmbeddedResource Include="..\guardado\bin\Release\Guardado.runtimeconfig.json" LogicalName="paquete/Guardado.runtimeconfig.json" />
+    <EmbeddedResource Include="..\guardado\bin\Release\Guardado.addin"              LogicalName="paquete/Guardado.addin" />
+  </ItemGroup>
+
+</Project>

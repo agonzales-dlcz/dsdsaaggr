@@ -1,0 +1,70 @@
+<Window x:Class="Riga.Instalador.Ventana"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Herramientas dsdsaaggr para Revit 2025"
+        Height="520" Width="680" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI" FontSize="13" Background="#F4F5F7">
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Herramientas dsdsaaggr" FontSize="21" FontWeight="SemiBold"
+                   Foreground="#1F2933"/>
+        <TextBlock Grid.Row="1" Margin="0,4,0,14" Foreground="#52606D" TextWrapping="Wrap"
+                   Text="Se instalan para tu usuario. No hace falta contrasena de administrador."/>
+
+        <Border Grid.Row="2" Background="White" BorderBrush="#D9DEE4" BorderThickness="1"
+                CornerRadius="4" Padding="14">
+            <StackPanel>
+                <TextBlock Text="Que se instala" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                    <TextBlock Text="Sectores" Width="150"/>
+                    <TextBlock Text="Leer coordenadas  ·  Parametrizar sectores" Foreground="#52606D"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                    <TextBlock Text="Vistas" Width="150"/>
+                    <TextBlock Text="Rejillas de vinculos" Foreground="#52606D"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                    <TextBlock Text="Guardado" Width="150"/>
+                    <TextBlock Text="Autoguardado y sincronizacion cada X minutos" Foreground="#52606D"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                    <TextBlock Text="Exportar planos" Width="150"/>
+                    <TextBlock Text="PDF, DWG, DXF, DGN e imagen, en lote" Foreground="#52606D"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                    <TextBlock Text="Exportar tablas" Width="150"/>
+                    <TextBlock Text="Tablas de planificacion a Excel, detalladas por elemento" Foreground="#52606D"/>
+                </StackPanel>
+                <TextBlock x:Name="lbDestino" Margin="0,10,0,0" Foreground="#7B8794"
+                           FontSize="12" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3" Margin="0,14,0,0" Background="White" BorderBrush="#D9DEE4"
+                BorderThickness="1" CornerRadius="4">
+            <ScrollViewer x:Name="scroll" VerticalScrollBarVisibility="Auto" Padding="10">
+                <TextBlock x:Name="lbLog" FontFamily="Consolas" FontSize="12"
+                           TextWrapping="Wrap" Foreground="#323F4B"/>
+            </ScrollViewer>
+        </Border>
+
+        <DockPanel Grid.Row="4" Margin="0,14,0,0">
+            <Button DockPanel.Dock="Right" x:Name="btCerrar" Content="Cerrar" MinWidth="100"
+                    Padding="14,7" Margin="8,0,0,0" Click="Cerrar_Click"/>
+            <Button DockPanel.Dock="Right" x:Name="btInstalar" Content="Instalar" MinWidth="130"
+                    Padding="14,7" Margin="8,0,0,0" FontWeight="SemiBold" Click="Instalar_Click"/>
+            <Button DockPanel.Dock="Left" x:Name="btDesinstalar" Content="Desinstalar" MinWidth="110"
+                    Padding="14,7" Click="Desinstalar_Click"/>
+            <TextBlock/>
+        </DockPanel>
+    </Grid>
+</Window>

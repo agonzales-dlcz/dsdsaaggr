@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Exportar Tablas</Name>
+    <Assembly>ExportarTablas.dll</Assembly>
+    <AddInId>b47e2c91-6f30-4d58-9a12-8e3c05d7f624</AddInId>
+    <FullClassName>Riga.ExportarTablas.App</FullClassName>
+    <VendorId>RIGA</VendorId>
+    <VendorDescription>RIGA / IREN</VendorDescription>
+  </AddIn>
+</RevitAddIns>

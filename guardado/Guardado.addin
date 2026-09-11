@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Guardado</Name>
+    <Assembly>Guardado.dll</Assembly>
+    <AddInId>a7c41e92-3b58-4d16-9f0a-2e83d7b45c61</AddInId>
+    <FullClassName>Riga.Guardado.App</FullClassName>
+    <VendorId>RIGA</VendorId>
+    <VendorDescription>RIGA / IREN</VendorDescription>
+  </AddIn>
+</RevitAddIns>

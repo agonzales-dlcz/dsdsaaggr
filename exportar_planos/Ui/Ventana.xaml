@@ -1,0 +1,521 @@
+<Window x:Class="Riga.ExportarPlanos.Ui.Ventana"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Riga.ExportarPlanos.Ui"
+        Title="Exportar planos" Height="820" Width="1320" MinHeight="640" MinWidth="1100"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        FontFamily="Segoe UI" FontSize="12" Background="#F0F0F0">
+
+    <Window.Resources>
+        <local:ColorEstado x:Key="colorEstado"/>
+
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="Padding" Value="8,6,8,8"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Margin" Value="0,3,0,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Margin" Value="0,3,0,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Padding" Value="0,3,6,3"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="3,2,3,2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="4,2,4,2"/>
+            <Setter Property="Margin" Value="0,2,0,2"/>
+        </Style>
+        <Style x:Key="Boton" TargetType="Button">
+            <Setter Property="Padding" Value="10,4,10,4"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="MinWidth" Value="80"/>
+        </Style>
+        <Style x:Key="Grilla" TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="SelectionMode" Value="Extended"/>
+            <Setter Property="GridLinesVisibility" Value="All"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="RowHeaderWidth" Value="0"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#E0E0E0"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="RowHeight" Value="24"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ==================== barra de perfil ==================== -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,6">
+            <TextBlock DockPanel.Dock="Left" Text="Exportar planos y vistas"
+                       FontSize="15" FontWeight="SemiBold" Foreground="#333"
+                       VerticalAlignment="Center"/>
+            <Button DockPanel.Dock="Right" Content="Borrar" Style="{StaticResource Boton}"
+                    MinWidth="62" Click="PerfilBorrar_Click"/>
+            <Button DockPanel.Dock="Right" Content="Guardar" Style="{StaticResource Boton}"
+                    MinWidth="68" Click="PerfilGuardar_Click"/>
+            <ComboBox DockPanel.Dock="Right" x:Name="cbPerfil" Width="220" IsEditable="True"
+                      SelectionChanged="Perfil_Cambio"
+                      ToolTip="Escribi un nombre nuevo y Guardar para crear otro perfil."/>
+            <Label DockPanel.Dock="Right" Content="Perfil" VerticalAlignment="Center"/>
+            <TextBlock/>
+        </DockPanel>
+
+        <!-- ==================== pestanas ==================== -->
+        <TabControl Grid.Row="1" x:Name="pestanas" SelectionChanged="Pestana_Cambio">
+
+            <!-- ============ 1. SELECCION ============ -->
+            <TabItem Header="Seleccion">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                        <RadioButton DockPanel.Dock="Left" x:Name="rbPlanos" Content="Planos"
+                                     GroupName="fuente" IsChecked="True" Margin="0,0,12,0"
+                                     Checked="Fuente_Cambio"/>
+                        <RadioButton DockPanel.Dock="Left" x:Name="rbVistas" Content="Vistas"
+                                     GroupName="fuente" Margin="0,0,20,0" Checked="Fuente_Cambio"/>
+
+                        <CheckBox DockPanel.Dock="Left" x:Name="chFiltrarConjunto"
+                                  Content="Filtrar por conjunto" Margin="0,0,6,0"
+                                  Checked="Conjunto_Cambio" Unchecked="Conjunto_Cambio"/>
+                        <ComboBox DockPanel.Dock="Left" x:Name="cbConjunto" Width="220"
+                                  IsEnabled="False" SelectionChanged="Conjunto_Cambio"/>
+
+                        <TextBox DockPanel.Dock="Right" x:Name="txBuscar" Width="260"
+                                 Margin="10,2,0,2" TextChanged="Buscar_Cambio"
+                                 ToolTip="Filtra por numero o nombre."/>
+                        <Label DockPanel.Dock="Right" Content="Buscar" VerticalAlignment="Center"/>
+                        <TextBlock/>
+                    </DockPanel>
+
+                    <DataGrid Grid.Row="1" x:Name="grilla" Style="{StaticResource Grilla}"
+                              AlternatingRowBackground="#FAFAFA"
+                              CellEditEnding="Celda_Editada">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="34" CanUserSort="False" IsReadOnly="True">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox x:Name="chTodos" Margin="0"
+                                                  HorizontalAlignment="Center"
+                                                  Click="Todos_Click"
+                                                  ToolTip="Marcar o desmarcar todo lo que se ve."/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding Marcada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment="Center" Margin="0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Numero" Binding="{Binding Numero}"
+                                                Width="230" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}"
+                                                Width="1.3*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Rev" Binding="{Binding Revision}"
+                                                Width="50" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Tamano" Binding="{Binding Papel}"
+                                                Width="80" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="colArchivo" Width="1.4*"
+                                                CanUserSort="False"
+                                                Binding="{Binding Archivo, UpdateSourceTrigger=LostFocus}">
+                                <DataGridTextColumn.Header>
+                                    <Button Content="Nombre de archivo" Click="NombreArchivo_Click"
+                                            HorizontalAlignment="Stretch" Padding="6,3,6,3"
+                                            ToolTip="Abre el armador del patron de nombre."/>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Estado" Binding="{Binding Estado}"
+                                                Width="130" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground"
+                                                Value="{Binding Estado, Converter={StaticResource colorEstado}}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DockPanel Grid.Row="2" Margin="0,6,0,0">
+                        <TextBlock DockPanel.Dock="Left" x:Name="lbPista" Foreground="#666"
+                                   VerticalAlignment="Center"
+                                   Text="Clic en el titulo de la columna Nombre de archivo para armar el patron. Cada fila se puede editar a mano."/>
+                        <CheckBox DockPanel.Dock="Right" x:Name="chSoloAbiertos"
+                                  Content="Mostrar solo los abiertos en Revit"
+                                  Checked="Filtro_Cambio" Unchecked="Filtro_Cambio"/>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ============ 2. FORMATO ============ -->
+            <TabItem Header="Formato">
+                <TabControl x:Name="tabFormatos" Margin="8" Background="#F7F7F7">
+
+                    <!-- PDF -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <CheckBox x:Name="chPdf" Content="PDF" IsChecked="True"
+                                      Checked="Formato_Cambio" Unchecked="Formato_Cambio"/>
+                        </TabItem.Header>
+                        <Grid Margin="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1.15*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- columna 1 -->
+                            <StackPanel Grid.Column="0">
+                                <GroupBox Header="Ubicacion en el papel">
+                                    <StackPanel>
+                                        <RadioButton x:Name="rbCentrado" Content="Centrado"
+                                                     GroupName="posicion" IsChecked="True"
+                                                     Checked="Posicion_Cambio"/>
+                                        <DockPanel>
+                                            <RadioButton DockPanel.Dock="Left" x:Name="rbEsquina"
+                                                         Content="Desde la esquina" GroupName="posicion"
+                                                         Margin="0,3,8,3" Checked="Posicion_Cambio"/>
+                                            <ComboBox x:Name="cbMargen" IsEnabled="False"/>
+                                        </DockPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="20,4,0,0">
+                                            <Label Content="X ="/>
+                                            <TextBox x:Name="txOffsetX" Width="66" IsEnabled="False"/>
+                                            <Label Content="mm     Y =" Margin="4,0,0,0"/>
+                                            <TextBox x:Name="txOffsetY" Width="66" IsEnabled="False"/>
+                                            <Label Content="mm"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <GroupBox Header="Zoom">
+                                    <StackPanel>
+                                        <RadioButton x:Name="rbAjustar" Content="Ajustar a la pagina"
+                                                     GroupName="zoom" Checked="Zoom_Cambio"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <RadioButton x:Name="rbZoom" Content="Zoom" GroupName="zoom"
+                                                         IsChecked="True" Margin="0,3,8,3"
+                                                         Checked="Zoom_Cambio"/>
+                                            <TextBox x:Name="txZoom" Width="60"/>
+                                            <Label Content="% del tamano"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <GroupBox Header="Calidad de salida">
+                                    <StackPanel>
+                                        <TextBlock TextWrapping="Wrap" Foreground="#666" Margin="0,0,0,4"
+                                                   Text="Usa el exportador PDF nativo de Revit: no hace falta ninguna impresora virtual."/>
+                                        <ComboBox x:Name="cbCalidad"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- columna 2 -->
+                            <StackPanel Grid.Column="1">
+                                <GroupBox Header="Vistas con lineas ocultas">
+                                    <StackPanel>
+                                        <Label Content="Quitar lineas usando"/>
+                                        <RadioButton x:Name="rbVectorial" Content="Proceso vectorial"
+                                                     GroupName="lineas"/>
+                                        <RadioButton x:Name="rbRaster" Content="Proceso rasterizado"
+                                                     GroupName="lineas" IsChecked="True"/>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <GroupBox Header="Aspecto">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Row="0" Grid.Column="0" Content="Calidad raster"/>
+                                        <ComboBox Grid.Row="0" Grid.Column="1" x:Name="cbRaster"/>
+                                        <Label Grid.Row="1" Grid.Column="0" Content="Colores"/>
+                                        <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cbColor"/>
+                                    </Grid>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- columna 3 -->
+                            <StackPanel Grid.Column="2">
+                                <GroupBox Header="Opciones">
+                                    <StackPanel>
+                                        <CheckBox x:Name="chEnlacesAzules" Content="Enlaces de vista en azul (solo en color)"/>
+                                        <CheckBox x:Name="chOcultarPlanosRef" Content="Ocultar planos de referencia y de trabajo"/>
+                                        <CheckBox x:Name="chOcultarEtiquetas" Content="Ocultar etiquetas de vista sin referenciar"/>
+                                        <CheckBox x:Name="chOcultarCajas" Content="Ocultar cajas de referencia"/>
+                                        <CheckBox x:Name="chOcultarCrop" Content="Ocultar limites de encuadre"/>
+                                        <CheckBox x:Name="chSemitonos" Content="Cambiar semitonos por lineas finas"/>
+                                        <CheckBox x:Name="chCoincidentes" Content="Los bordes de region enmascaran lineas coincidentes"/>
+                                        <CheckBox x:Name="chPararEnError" Content="Detener todo si un item falla"/>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <GroupBox Header="Archivo">
+                                    <StackPanel>
+                                        <RadioButton x:Name="rbSeparados" Content="Un archivo por plano o vista"
+                                                     GroupName="modo" IsChecked="True" Checked="Modo_Cambio"/>
+                                        <RadioButton x:Name="rbUnoSolo" Content="Combinar todo en un solo archivo"
+                                                     GroupName="modo" Checked="Modo_Cambio"/>
+                                        <RadioButton x:Name="rbVarios" Content="Combinar en varios archivos"
+                                                     GroupName="modo" Checked="Modo_Cambio"/>
+
+                                        <Grid Margin="20,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="Agrupar por"/>
+                                            <ComboBox Grid.Column="1" x:Name="cbAgrupar" IsEnabled="False"
+                                                      SelectionChanged="Agrupar_Cambio"/>
+                                        </Grid>
+                                        <TextBox x:Name="txParamGrupo" Margin="20,0,0,4" IsEnabled="False"
+                                                 ToolTip="Nombre del parametro por el que agrupar."/>
+
+                                        <DockPanel Margin="0,2,0,0">
+                                            <Label DockPanel.Dock="Left" Content="Nombre del combinado"/>
+                                            <TextBox x:Name="txNombreCombinado" IsEnabled="False"
+                                                     ToolTip="Admite los mismos campos que el nombre de archivo, mas {Grupo}."/>
+                                        </DockPanel>
+
+                                        <CheckBox x:Name="chPapelAuto" Margin="0,6,0,0"
+                                                  Content="Mantener el tamano y la orientacion del cajetin"/>
+
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- DWG -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <CheckBox x:Name="chDwg" Content="DWG"
+                                      Checked="Formato_Cambio" Unchecked="Formato_Cambio"/>
+                        </TabItem.Header>
+                        <StackPanel Margin="8" Width="520" HorizontalAlignment="Left">
+                            <GroupBox Header="Configuracion de exportacion guardada en el proyecto">
+                                <StackPanel>
+                                    <ComboBox x:Name="cbDwgConfig"
+                                              ToolTip="Las de Exportar &gt; CAD &gt; Modificar configuracion. Si elegis una, manda ella."/>
+                                    <TextBlock TextWrapping="Wrap" Foreground="#666" Margin="0,4,0,0"
+                                               Text="Con una configuracion elegida se ignoran la version y los colores de abajo."/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Opciones">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="Version"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="1" x:Name="cbDwgVersion"/>
+                                    <Label Grid.Row="1" Grid.Column="0" Content="Colores"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cbDwgColores"/>
+                                    <CheckBox Grid.Row="2" Grid.Column="1" x:Name="chDwgCoords"
+                                              Content="Usar coordenadas compartidas"/>
+                                    <StackPanel Grid.Row="3" Grid.Column="1">
+                                        <CheckBox x:Name="chDwgFusionar"
+                                                  Content="Fusionar las vistas del plano en un solo dibujo"/>
+                                        <TextBlock TextWrapping="Wrap" Foreground="#8A5A00" Margin="20,0,0,0"
+                                                   Text="Si lo destildas, Revit escribe ademas un DWG por cada vista colocada, como referencia externa: un plano puede dejar cientos de archivos."/>
+                                    </StackPanel>
+                                </Grid>
+                            </GroupBox>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- DXF -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <CheckBox x:Name="chDxf" Content="DXF"
+                                      Checked="Formato_Cambio" Unchecked="Formato_Cambio"/>
+                        </TabItem.Header>
+                        <TextBlock Margin="16" TextWrapping="Wrap" Foreground="#444" MaxWidth="520"
+                                   HorizontalAlignment="Left"
+                                   Text="El DXF usa la misma configuracion de exportacion que el DWG (la de la pestana anterior). Revit no expone opciones propias para DXF."/>
+                    </TabItem>
+
+                    <!-- DGN -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <CheckBox x:Name="chDgn" Content="DGN"
+                                      Checked="Formato_Cambio" Unchecked="Formato_Cambio"/>
+                        </TabItem.Header>
+                        <StackPanel Margin="8" Width="520" HorizontalAlignment="Left">
+                            <GroupBox Header="Archivo semilla (opcional)">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Content="..." Width="30"
+                                            Margin="6,2,0,2" Click="Semilla_Click"/>
+                                    <TextBox x:Name="txDgnSemilla" Margin="0,2,0,2"/>
+                                </DockPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- IMG -->
+                    <TabItem>
+                        <TabItem.Header>
+                            <CheckBox x:Name="chImg" Content="IMG"
+                                      Checked="Formato_Cambio" Unchecked="Formato_Cambio"/>
+                        </TabItem.Header>
+                        <StackPanel Margin="8" Width="520" HorizontalAlignment="Left">
+                            <GroupBox Header="Imagen">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="Formato"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="1" x:Name="cbImgTipo"/>
+                                    <Label Grid.Row="1" Grid.Column="0" Content="Resolucion"/>
+                                    <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cbImgResolucion"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Content="Ajuste"/>
+                                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cbImgZoomTipo"/>
+                                    <Label Grid.Row="3" Grid.Column="0" Content="Lado mayor (px)"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" x:Name="txImgPixeles" Margin="0,2,0,2"/>
+                                    <Label Grid.Row="4" Grid.Column="0" Content="Zoom (%)"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" x:Name="txImgZoom" Margin="0,2,0,2"/>
+                                </Grid>
+                            </GroupBox>
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+
+            <!-- ============ 3. CREAR ============ -->
+            <TabItem Header="Crear">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="420"/>
+                    </Grid.ColumnDefinitions>
+
+                    <GroupBox Grid.Row="0" Grid.Column="0" Header="Reglas de exportacion">
+                        <StackPanel>
+                            <DockPanel>
+                                <Label DockPanel.Dock="Left" Content="Carpeta" Width="60"/>
+                                <Button DockPanel.Dock="Right" Content="..." Width="30"
+                                        Margin="6,2,0,2" Click="Carpeta_Click"/>
+                                <TextBox x:Name="txCarpeta" Margin="0,2,0,2"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,4,0,0">
+                                <ComboBox DockPanel.Dock="Right" x:Name="cbInforme" Width="180"/>
+                                <StackPanel>
+                                    <RadioButton x:Name="rbMismaCarpeta" GroupName="carpeta" IsChecked="True"
+                                                 Content="Guardar todo en la misma carpeta"/>
+                                    <RadioButton x:Name="rbPorFormato" GroupName="carpeta"
+                                                 Content="Separar en una subcarpeta por formato"/>
+                                    <CheckBox x:Name="chSobrescribir" Content="Sobrescribir si el archivo ya existe"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Grid.Row="0" Grid.Column="1" Header="Progreso" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock x:Name="lbProgreso" Text="Sin empezar" Margin="0,2,0,6"/>
+                            <ProgressBar x:Name="barra" Height="18" Minimum="0" Maximum="1" Value="0"/>
+                            <TextBlock x:Name="lbDetalle" Foreground="#666" Margin="0,6,0,0"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,6">
+                        <Label DockPanel.Dock="Left" Content="Fijar tamano"/>
+                        <ComboBox DockPanel.Dock="Left" x:Name="cbFijarPapel" Width="130"
+                                  SelectionChanged="FijarPapel_Cambio"
+                                  ToolTip="Se aplica a las filas seleccionadas de la lista."/>
+                        <Label DockPanel.Dock="Left" Content="Fijar orientacion" Margin="10,0,0,0"/>
+                        <ComboBox DockPanel.Dock="Left" x:Name="cbFijarOrientacion" Width="130"
+                                  SelectionChanged="FijarOrientacion_Cambio"/>
+                        <TextBlock DockPanel.Dock="Right" x:Name="lbSalidas" Foreground="#666"
+                                   VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <TextBlock/>
+                    </DockPanel>
+
+                    <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                              x:Name="grillaSalida" Style="{StaticResource Grilla}" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Clase}" Width="60"/>
+                            <DataGridTextColumn Header="Numero" Binding="{Binding Numero}" Width="230"/>
+                            <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="1.3*"/>
+                            <DataGridTextColumn Header="Formato" Binding="{Binding Formato}" Width="80"/>
+                            <DataGridTextColumn Header="Tamano" Binding="{Binding Papel}" Width="90"/>
+                            <DataGridTextColumn Header="Orientacion" Binding="{Binding Orientacion}" Width="90"/>
+                            <DataGridTextColumn Header="Progreso" Binding="{Binding Progreso}" Width="1*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground"
+                                                Value="{Binding Progreso, Converter={StaticResource colorEstado}}"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- ==================== barra inferior ==================== -->
+        <DockPanel Grid.Row="2" Margin="0,8,0,0">
+            <TextBlock DockPanel.Dock="Left" x:Name="lbResumen" VerticalAlignment="Center"
+                       Foreground="#444"/>
+            <Button DockPanel.Dock="Right" x:Name="btCrear" Content="Crear"
+                    Style="{StaticResource Boton}" FontWeight="SemiBold" MinWidth="120"
+                    Click="Crear_Click"/>
+            <Button DockPanel.Dock="Right" x:Name="btSiguiente" Content="Siguiente"
+                    Style="{StaticResource Boton}" Click="Siguiente_Click"/>
+            <Button DockPanel.Dock="Right" x:Name="btAtras" Content="Atras"
+                    Style="{StaticResource Boton}" Click="Atras_Click"/>
+            <Button DockPanel.Dock="Right" x:Name="btCerrar" Content="Cerrar"
+                    Style="{StaticResource Boton}" Click="Cerrar_Click"/>
+            <TextBlock/>
+        </DockPanel>
+    </Grid>
+</Window>

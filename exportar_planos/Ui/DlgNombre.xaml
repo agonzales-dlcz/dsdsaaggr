@@ -1,0 +1,59 @@
+<Window x:Class="Riga.ExportarPlanos.Ui.DlgNombre"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nombre de archivo" Height="520" Width="720"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        FontFamily="Segoe UI" FontSize="12" Background="#F0F0F0">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Header="Patron" Background="White" Padding="8" Margin="0,0,0,8">
+            <StackPanel>
+                <TextBox x:Name="txPatron" FontFamily="Consolas" FontSize="13" Padding="4"
+                         TextChanged="Patron_Cambio"/>
+                <DockPanel Margin="0,6,0,0">
+                    <Label DockPanel.Dock="Left" Content="Insertar campo"/>
+                    <ComboBox DockPanel.Dock="Left" x:Name="cbCampos" Width="240"
+                              SelectionChanged="Campo_Elegido"/>
+                    <Label DockPanel.Dock="Left" Content="Caracteres prohibidos por"
+                           Margin="16,0,0,0"/>
+                    <TextBox DockPanel.Dock="Left" x:Name="txReemplazo" Width="44"
+                             TextChanged="Patron_Cambio"/>
+                    <TextBlock/>
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <TextBlock Grid.Row="1" Margin="2,0,0,4" Foreground="#666"
+                   Text="Lo que este fuera de las llaves se escribe tal cual. Los campos de plano quedan vacios sobre una vista."/>
+
+        <GroupBox Grid.Row="2" Header="Vista previa" Background="White" Padding="4">
+            <DataGrid x:Name="grilla" AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserAddRows="False" HeadersVisibility="Column" RowHeaderWidth="0"
+                      GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#EEE"
+                      AlternatingRowBackground="#FAFAFA" RowHeight="22">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Numero" Binding="{Binding Numero}" Width="220"/>
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="Archivo resultante" Binding="{Binding Archivo}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <DockPanel Grid.Row="3" Margin="0,10,0,0">
+            <TextBlock DockPanel.Dock="Left" x:Name="lbAviso" Foreground="#C02020"
+                       VerticalAlignment="Center"/>
+            <Button DockPanel.Dock="Right" Content="Cancelar" MinWidth="90" Padding="10,4,10,4"
+                    Margin="6,0,0,0" IsCancel="True"/>
+            <Button DockPanel.Dock="Right" Content="Aceptar" MinWidth="90" Padding="10,4,10,4"
+                    Margin="6,0,0,0" IsDefault="True" Click="Aceptar_Click"/>
+            <TextBlock/>
+        </DockPanel>
+    </Grid>
+</Window>

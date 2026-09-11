@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Vistas</Name>
+    <Assembly>Vistas.dll</Assembly>
+    <AddInId>5d2f83b7-1c46-4e90-a8b3-6f70e91d2a58</AddInId>
+    <FullClassName>Riga.Vistas.App</FullClassName>
+    <VendorId>RIGA</VendorId>
+    <VendorDescription>RIGA / IREN</VendorDescription>
+  </AddIn>
+</RevitAddIns>

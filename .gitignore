@@ -1,0 +1,21 @@
+# Salidas de compilacion
+bin/
+obj/
+instalador/publicado/
+
+# Archivos que quedan cuando Revit tiene una DLL tomada y hay que renombrarla
+*.bloqueada.*
+
+# Registros
+*.log
+
+# Certificados: NUNCA en el repositorio
+*.pfx
+*.p12
+*.snk
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo

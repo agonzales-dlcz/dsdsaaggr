@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Exportar Planos</Name>
+    <Assembly>ExportarPlanos.dll</Assembly>
+    <AddInId>3f8b6d14-52c7-4a91-b0e3-7c95a1d84e60</AddInId>
+    <FullClassName>Riga.ExportarPlanos.App</FullClassName>
+    <VendorId>RIGA</VendorId>
+    <VendorDescription>RIGA / IREN</VendorDescription>
+  </AddIn>
+</RevitAddIns>

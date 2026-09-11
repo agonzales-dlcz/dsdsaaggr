@@ -1,0 +1,109 @@
+<Window x:Class="Riga.ExportarTablas.Ui.VentanaImportar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Importar tablas"
+        Height="700" Width="1000"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="Segoe UI" FontSize="13" Background="#F4F5F7">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Devolver al modelo un Excel exportado y editado"
+                   FontSize="19" FontWeight="SemiBold" Foreground="#1F2933"/>
+        <TextBlock Grid.Row="1" Margin="0,4,0,12" Foreground="#52606D" TextWrapping="Wrap"
+                   Text="Cada fila se ubica por su GUID y cada columna por la chapa de su cabecera. Si el archivo no salio de aqui, no hay chapas y no se puede importar."/>
+
+        <Border Grid.Row="2" Background="White" BorderBrush="#D9DEE4" BorderThickness="1"
+                CornerRadius="4" Padding="12" Margin="0,0,0,10">
+            <StackPanel>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" x:Name="btExaminar" Content="Examinar..."
+                            MinWidth="100" Padding="12,5" Margin="8,0,0,0" Click="Examinar_Click"/>
+                    <TextBox x:Name="txtRuta" Padding="5,4" IsReadOnly="True"
+                             VerticalContentAlignment="Center"/>
+                </DockPanel>
+
+                <TextBlock x:Name="lbHojas" Margin="0,10,0,4" Foreground="#52606D"
+                           Text="Ninguna hoja cargada."/>
+                <Border BorderBrush="#E4E7EB" BorderThickness="1" CornerRadius="3" MaxHeight="110">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="listaHojas" Margin="8">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Etiqueta}" IsChecked="{Binding Elegida}"
+                                              Margin="0,2,0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3" Background="White" BorderBrush="#D9DEE4" BorderThickness="1"
+                CornerRadius="4" Padding="12" Margin="0,0,0,10">
+            <StackPanel>
+                <CheckBox x:Name="chkTipo" Margin="0,2,0,2"
+                          Content="Permitir escribir parametros que solo existen en el TIPO"/>
+                <TextBlock Text="Cambia todas las instancias de ese tipo, no solo la fila del Excel."
+                           Foreground="#A02020" FontSize="11" Margin="24,0,0,6" TextWrapping="Wrap"/>
+                <CheckBox x:Name="chkVaciar" Margin="0,2,0,2"
+                          Content="Una celda vacia borra el valor del parametro"/>
+                <TextBlock Text="Sin marcar, las celdas vacias se ignoran y no pisan nada."
+                           Foreground="#7B8794" FontSize="11" Margin="24,0,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <TabControl Grid.Row="4" x:Name="pestanas" Background="White" BorderBrush="#D9DEE4">
+            <TabItem Header="Cambios" x:Name="tabCambios">
+                <DataGrid x:Name="grilla" AutoGenerateColumns="False" IsReadOnly="True"
+                          HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                          RowHeaderWidth="0" BorderThickness="0" FontSize="12"
+                          AlternatingRowBackground="#F7F9FB">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hoja" Binding="{Binding Hoja}" Width="140"/>
+                        <DataGridTextColumn Header="Fila" Binding="{Binding Fila}" Width="55"/>
+                        <DataGridTextColumn Header="Element ID" Binding="{Binding Id}" Width="95"/>
+                        <DataGridTextColumn Header="Parametro" Binding="{Binding Columna}" Width="180"/>
+                        <DataGridTextColumn Header="Antes" Binding="{Binding Antes}" Width="150"/>
+                        <DataGridTextColumn Header="Despues" Binding="{Binding Despues}" Width="150"/>
+                        <DataGridTextColumn Header="Donde" Binding="{Binding Donde}" Width="90"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Saltados" x:Name="tabSaltos">
+                <DataGrid x:Name="grillaSaltos" AutoGenerateColumns="False" IsReadOnly="True"
+                          HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                          RowHeaderWidth="0" BorderThickness="0" FontSize="12"
+                          AlternatingRowBackground="#F7F9FB">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hoja" Binding="{Binding Hoja}" Width="140"/>
+                        <DataGridTextColumn Header="Fila" Binding="{Binding Fila}" Width="55"/>
+                        <DataGridTextColumn Header="Columna" Binding="{Binding Columna}" Width="180"/>
+                        <DataGridTextColumn Header="Motivo" Binding="{Binding Motivo}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
+
+        <DockPanel Grid.Row="5" Margin="0,12,0,0">
+            <Button DockPanel.Dock="Right" x:Name="btCerrar" Content="Cerrar" MinWidth="90"
+                    Padding="14,7" Margin="8,0,0,0" IsCancel="True" Click="Cerrar_Click"/>
+            <Button DockPanel.Dock="Right" x:Name="btAplicar" Content="Aplicar al modelo"
+                    MinWidth="150" Padding="14,7" Margin="8,0,0,0" FontWeight="SemiBold"
+                    IsEnabled="False" Click="Aplicar_Click"/>
+            <Button DockPanel.Dock="Right" x:Name="btAnalizar" Content="Analizar" MinWidth="110"
+                    Padding="14,7" Margin="8,0,0,0" IsEnabled="False" Click="Analizar_Click"/>
+            <TextBlock x:Name="lbResumen" VerticalAlignment="Center" Foreground="#323F4B"
+                       TextWrapping="Wrap"/>
+        </DockPanel>
+    </Grid>
+</Window>
