@@ -29,7 +29,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-$proyectos = @('sectores', 'vistas', 'guardado', 'exportar_planos', 'exportar_tablas')
+$proyectos = @('sectores', 'vistas', 'guardado', 'exportar_planos', 'exportar_tablas', 'limpiar_nulos')
 
 foreach ($p in $proyectos) {
     Write-Output "== compilando $p"
