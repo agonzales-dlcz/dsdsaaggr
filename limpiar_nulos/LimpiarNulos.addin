@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Limpiar Nulos</Name>
+    <Assembly>LimpiarNulos.dll</Assembly>
+    <AddInId>12345678-1234-1234-1234-123456789abc</AddInId>
+    <FullClassName>Riga.LimpiarNulos.App</FullClassName>
+    <VendorId>RIGA</VendorId>
+    <VendorDescription>RIGA / IREN</VendorDescription>
+  </AddIn>
+</RevitAddIns>
