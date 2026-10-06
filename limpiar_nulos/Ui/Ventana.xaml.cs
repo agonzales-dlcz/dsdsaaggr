@@ -104,13 +104,13 @@ namespace Riga.LimpiarNulos.Ui
 
             if (_vistaParametros.IsEmpty)
             {
-                txtSinResultados.Visibility = Visibility.Visible;
-                listaParametros.Visibility = Visibility.Collapsed;
+                txtSinResultados.Visibility = System.Windows.Visibility.Visible;
+                listaParametros.Visibility = System.Windows.Visibility.Collapsed;
             }
             else
             {
-                txtSinResultados.Visibility = Visibility.Collapsed;
-                listaParametros.Visibility = Visibility.Visible;
+                txtSinResultados.Visibility = System.Windows.Visibility.Collapsed;
+                listaParametros.Visibility = System.Windows.Visibility.Visible;
             }
 
             ActualizarUI();
@@ -160,11 +160,11 @@ namespace Riga.LimpiarNulos.Ui
             txtBuscar.IsEnabled = false;
             listaParametros.IsEnabled = false;
 
-            barraProgreso.Visibility = Visibility.Visible;
-            txtEstadoProceso.Visibility = Visibility.Visible;
+            barraProgreso.Visibility = System.Windows.Visibility.Visible;
+            txtEstadoProceso.Visibility = System.Windows.Visibility.Visible;
 
             txtEstadoProceso.Text = "Guardando archivo localmente...";
-            txtProgresoInfo.Visibility = Visibility.Collapsed;
+            txtProgresoInfo.Visibility = System.Windows.Visibility.Collapsed;
             DoEvents();
 
             // Guardar local antes de limpiar
