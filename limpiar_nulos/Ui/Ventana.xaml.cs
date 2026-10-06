@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 using System.ComponentModel;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -50,7 +51,7 @@ namespace Riga.LimpiarNulos.Ui
                         Definicion = definition,
                         Nombre = definition.Name,
                         Binding = binding,
-                        Seleccionado = false // Por defecto desmarcados
+                        Seleccionado = false
                     };
                     item.PropertyChanged += Item_PropertyChanged;
                     ParametrosDisponibles.Add(item);
@@ -120,7 +121,7 @@ namespace Riga.LimpiarNulos.Ui
             if (sender is ListViewItem item && item.DataContext is ParametroItem parametro)
             {
                 parametro.Seleccionado = !parametro.Seleccionado;
-                e.Handled = true; // Prevenir que la lista cambie la selección visual
+                e.Handled = true;
             }
         }
 
@@ -128,11 +129,16 @@ namespace Riga.LimpiarNulos.Ui
         {
             bool nuevoEstado = !_todosSeleccionados;
 
-            // Solo cambiamos los que están visibles en la búsqueda
             foreach (ParametroItem item in _vistaParametros)
             {
                 item.Seleccionado = nuevoEstado;
             }
+        }
+
+        // Método auxiliar para forzar la actualización de la UI en tiempo real
+        private void DoEvents()
+        {
+            Dispatcher.Invoke(new Action(() => { }), DispatcherPriority.Background);
         }
 
         private void Ejecutar_Click(object sender, RoutedEventArgs e)
@@ -140,7 +146,6 @@ namespace Riga.LimpiarNulos.Ui
             var seleccionados = ParametrosDisponibles.Where(p => p.Seleccionado).ToList();
             if (seleccionados.Count == 0) return;
 
-            // Validar si el documento ha sido guardado al menos una vez
             if (string.IsNullOrEmpty(_doc.PathName))
             {
                 MessageBox.Show("Este proyecto nunca ha sido guardado. Por favor, guárdalo al menos una vez antes de limpiar los nulos para evitar pérdidas de avance.",
@@ -148,10 +153,26 @@ namespace Riga.LimpiarNulos.Ui
                 return;
             }
 
+            // Preparar UI para ejecución
+            btnEjecutar.IsEnabled = false;
+            btnCancelar.IsEnabled = false;
+            btnToggleTodos.IsEnabled = false;
+            txtBuscar.IsEnabled = false;
+            listaParametros.IsEnabled = false;
+
+            barraProgreso.Visibility = Visibility.Visible;
+            txtEstadoProceso.Visibility = Visibility.Visible;
+
+            txtEstadoProceso.Text = "Guardando archivo localmente...";
+            txtProgresoInfo.Visibility = Visibility.Collapsed;
+            DoEvents();
+
             // Guardar local antes de limpiar
+            bool guardadoExitoso = false;
             try
             {
                 _doc.Save();
+                guardadoExitoso = true;
             }
             catch (Exception ex)
             {
@@ -161,13 +182,22 @@ namespace Riga.LimpiarNulos.Ui
 
             int elementosModificados = 0;
             int elementosOmitidos = 0;
+            int totalParametros = seleccionados.Count;
 
             using (var transaccion = new Transaction(_doc, "Limpiar Parámetros Nulos"))
             {
                 transaccion.Start();
 
-                foreach (var parametro in seleccionados)
+                for (int i = 0; i < totalParametros; i++)
                 {
+                    var parametro = seleccionados[i];
+
+                    // Actualizar barra de progreso
+                    double porcentaje = (double)i / totalParametros * 100;
+                    barraProgreso.Value = porcentaje;
+                    txtEstadoProceso.Text = $"Limpiando parámetros... ({i + 1}/{totalParametros}: {parametro.Nombre})";
+                    DoEvents();
+
                     foreach (Category category in parametro.Binding.Categories)
                     {
                         var elementos = new FilteredElementCollector(_doc)
@@ -206,10 +236,22 @@ namespace Riga.LimpiarNulos.Ui
                     }
                 }
 
+                // Progreso al 100%
+                barraProgreso.Value = 100;
+                txtEstadoProceso.Text = "Finalizando...";
+                DoEvents();
+
                 transaccion.Commit();
             }
 
-            string mensaje = $"Se han limpiado nulos en {elementosModificados} elementos.\n";
+            string mensaje = string.Empty;
+            if (guardadoExitoso)
+            {
+                mensaje += "✓ Archivo guardado localmente de forma segura.\n\n";
+            }
+
+            mensaje += $"Se han limpiado nulos en {elementosModificados} elementos.\n";
+
             if (elementosOmitidos > 0)
             {
                 mensaje += $"\nAdvertencia: Se omitieron {elementosOmitidos} elementos (Bloqueados, solo lectura o en uso por otro usuario).";
