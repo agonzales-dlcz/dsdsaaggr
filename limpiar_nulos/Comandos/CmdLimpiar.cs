@@ -26,6 +26,7 @@ namespace Riga.LimpiarNulos.Comandos
             try
             {
                 var ventana = new Ui.Ventana(uidoc);
+                new WindowInteropHelper(ventana).Owner = datos.Application.MainWindowHandle;
                 ventana.ShowDialog();
                 return Result.Succeeded;
             }
