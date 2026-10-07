@@ -38,8 +38,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Resources\icon.jpg" />
-  </ItemGroup>
-
 </Project>
