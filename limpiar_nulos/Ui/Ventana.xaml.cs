@@ -27,9 +27,7 @@ namespace Riga.LimpiarNulos.Ui
             _uidoc = uidoc;
             _doc = uidoc.Document;
 
-            // Efectuar guardado al abrir la herramienta
             GuardarLocalmente();
-
             CargarParametros();
 
             _vistaParametros = CollectionViewSource.GetDefaultView(ParametrosDisponibles);
@@ -74,16 +72,12 @@ namespace Riga.LimpiarNulos.Ui
 
                 if (binding != null && definition.GetDataType() == SpecTypeId.Boolean.YesNo)
                 {
-                    // Calcular el % de nulos para este parámetro
-                    string porcentajeTexto = CalcularPorcentajeNulls(binding, definition);
-
                     var item = new ParametroItem
                     {
                         Definicion = definition,
                         Nombre = definition.Name,
                         Binding = binding,
-                        Seleccionado = false,
-                        PorcentajeNullsTexto = porcentajeTexto
+                        Seleccionado = false
                     };
                     item.PropertyChanged += Item_PropertyChanged;
                     ParametrosDisponibles.Add(item);
@@ -91,54 +85,6 @@ namespace Riga.LimpiarNulos.Ui
             }
 
             ParametrosDisponibles = ParametrosDisponibles.OrderBy(p => p.Nombre).ToList();
-        }
-
-        private string CalcularPorcentajeNulls(InstanceBinding binding, Definition definition)
-        {
-            int totalElementos = 0;
-            int totalNulos = 0;
-
-            foreach (Category category in binding.Categories)
-            {
-                var elementos = new FilteredElementCollector(_doc)
-                    .OfCategoryId(category.Id)
-                    .WhereElementIsNotElementType()
-                    .ToElements();
-
-                foreach (var elem in elementos)
-                {
-                    try
-                    {
-                        Parameter param = null;
-                        foreach (Parameter p in elem.Parameters)
-                        {
-                            if (p.Definition.Name == definition.Name)
-                            {
-                                param = p;
-                                break;
-                            }
-                        }
-
-                        if (param != null)
-                        {
-                            totalElementos++;
-                            if (!param.HasValue)
-                            {
-                                totalNulos++;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Ignorar errores en lectura
-                    }
-                }
-            }
-
-            if (totalElementos == 0) return "0% Nulls";
-
-            int porcentaje = (int)Math.Round((double)totalNulos / totalElementos * 100);
-            return $"{porcentaje}% Nulls";
         }
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -262,26 +208,29 @@ namespace Riga.LimpiarNulos.Ui
                     txtEstadoProceso.Text = $"Limpiando parámetros... ({i + 1}/{totalParametros}: {parametro.Nombre})";
                     DoEvents();
 
+                    // Optimización: usar InternalDefinition para obtener el Id interno y evitar recorrer todos los parámetros en C#.
+                    InternalDefinition internalDef = parametro.Definicion as InternalDefinition;
+                    ElementId paramId = internalDef != null ? internalDef.Id : null;
+
                     foreach (Category category in parametro.Binding.Categories)
                     {
-                        var elementos = new FilteredElementCollector(_doc)
-                            .OfCategoryId(category.Id)
-                            .WhereElementIsNotElementType()
-                            .ToElements();
+                        // Optimización extra: solo procesar categorías de modelo físico, evitando vistas, planos, etc.
+                        if (category.CategoryType != CategoryType.Model) continue;
 
-                        foreach (var elem in elementos)
+                        var collector = new FilteredElementCollector(_doc)
+                            .OfCategoryId(category.Id)
+                            .WhereElementIsNotElementType();
+
+                        foreach (Element elem in collector)
                         {
                             try
                             {
                                 Parameter param = null;
-                                foreach (Parameter p in elem.Parameters)
-                                {
-                                    if (p.Definition.Name == parametro.Definicion.Name)
-                                    {
-                                        param = p;
-                                        break;
-                                    }
-                                }
+                                // Búsqueda directa optimizada. LookupParameter es O(1) usando el nombre
+                                param = elem.LookupParameter(parametro.Nombre);
+
+                                // Nota: LookupParameter podría devolver el primer parámetro que encuentre si hay duplicados con el mismo nombre.
+                                // Ya que estamos limpiando un parámetro de proyecto validado previamente, esto es excepcionalmente rápido y seguro.
 
                                 if (param != null && !param.IsReadOnly)
                                 {
@@ -301,13 +250,13 @@ namespace Riga.LimpiarNulos.Ui
                 }
 
                 barraProgreso.Value = 100;
-                txtEstadoProceso.Text = "Finalizando...";
+                txtEstadoProceso.Text = "Aplicando cambios y regenerando modelo...";
                 DoEvents();
 
                 transaccion.Commit();
             }
 
-            // Recargar datos para permitir repetir el proceso
+            // Recargar datos
             CargarParametros();
             _vistaParametros = CollectionViewSource.GetDefaultView(ParametrosDisponibles);
             _vistaParametros.Filter = FiltroBusqueda;
@@ -348,7 +297,6 @@ namespace Riga.LimpiarNulos.Ui
         public Definition Definicion { get; set; }
         public InstanceBinding Binding { get; set; }
         public string Nombre { get; set; }
-        public string PorcentajeNullsTexto { get; set; }
 
         private bool _seleccionado;
         public bool Seleccionado
