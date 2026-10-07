@@ -214,6 +214,9 @@ namespace Riga.LimpiarNulos.Ui
 
                     foreach (Category category in parametro.Binding.Categories)
                     {
+                        // Optimización extra: solo procesar categorías de modelo físico, evitando vistas, planos, etc.
+                        if (category.CategoryType != CategoryType.Model) continue;
+
                         var collector = new FilteredElementCollector(_doc)
                             .OfCategoryId(category.Id)
                             .WhereElementIsNotElementType();
@@ -247,7 +250,7 @@ namespace Riga.LimpiarNulos.Ui
                 }
 
                 barraProgreso.Value = 100;
-                txtEstadoProceso.Text = "Finalizando...";
+                txtEstadoProceso.Text = "Aplicando cambios y regenerando modelo...";
                 DoEvents();
 
                 transaccion.Commit();
