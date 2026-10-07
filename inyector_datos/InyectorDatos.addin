@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Name>Inyectar datos</Name>
+    <Assembly>InyectorDatos.dll</Assembly>
+    <AddInId>8E17AF87-E0C6-4B83-A8CA-BDBB303FF930</AddInId>
+    <FullClassName>Riga.InyectorDatos.Comandos.DataInjectorCommand</FullClassName>
+    <Text>Inyectar datos</Text>
+    <Description>Inyecta datos desde un archivo CSV a parámetros de elementos en Revit.</Description>
+    <VendorId>RIGA</VendorId>
+    <VendorDescription>Riga, www.riga.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>
