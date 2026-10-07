@@ -66,6 +66,11 @@
     <EmbeddedResource Include="..\guardado\bin\Release\Guardado.deps.json"          LogicalName="paquete/Guardado.deps.json" />
     <EmbeddedResource Include="..\guardado\bin\Release\Guardado.runtimeconfig.json" LogicalName="paquete/Guardado.runtimeconfig.json" />
     <EmbeddedResource Include="..\guardado\bin\Release\Guardado.addin"              LogicalName="paquete/Guardado.addin" />
+
+    <EmbeddedResource Include="..\limpiar_nulos\bin\Release\LimpiarNulos.dll"                LogicalName="paquete/LimpiarNulos.dll" />
+    <EmbeddedResource Include="..\limpiar_nulos\bin\Release\LimpiarNulos.deps.json"          LogicalName="paquete/LimpiarNulos.deps.json" />
+    <EmbeddedResource Include="..\limpiar_nulos\bin\Release\LimpiarNulos.runtimeconfig.json" LogicalName="paquete/LimpiarNulos.runtimeconfig.json" />
+    <EmbeddedResource Include="..\limpiar_nulos\bin\Release\LimpiarNulos.addin"              LogicalName="paquete/LimpiarNulos.addin" />
   </ItemGroup>
 
 </Project>
