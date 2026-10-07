@@ -38,4 +38,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="icono_nulos.png" />
+  </ItemGroup>
+
 </Project>
