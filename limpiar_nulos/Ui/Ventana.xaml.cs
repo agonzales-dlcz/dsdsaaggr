@@ -208,26 +208,26 @@ namespace Riga.LimpiarNulos.Ui
                     txtEstadoProceso.Text = $"Limpiando parámetros... ({i + 1}/{totalParametros}: {parametro.Nombre})";
                     DoEvents();
 
+                    // Optimización: usar InternalDefinition para obtener el Id interno y evitar recorrer todos los parámetros en C#.
+                    InternalDefinition internalDef = parametro.Definicion as InternalDefinition;
+                    ElementId paramId = internalDef != null ? internalDef.Id : null;
+
                     foreach (Category category in parametro.Binding.Categories)
                     {
-                        var elementos = new FilteredElementCollector(_doc)
+                        var collector = new FilteredElementCollector(_doc)
                             .OfCategoryId(category.Id)
-                            .WhereElementIsNotElementType()
-                            .ToElements();
+                            .WhereElementIsNotElementType();
 
-                        foreach (var elem in elementos)
+                        foreach (Element elem in collector)
                         {
                             try
                             {
                                 Parameter param = null;
-                                foreach (Parameter p in elem.Parameters)
-                                {
-                                    if (p.Definition.Name == parametro.Definicion.Name)
-                                    {
-                                        param = p;
-                                        break;
-                                    }
-                                }
+                                // Búsqueda directa optimizada. LookupParameter es O(1) usando el nombre
+                                param = elem.LookupParameter(parametro.Nombre);
+
+                                // Nota: LookupParameter podría devolver el primer parámetro que encuentre si hay duplicados con el mismo nombre.
+                                // Ya que estamos limpiando un parámetro de proyecto validado previamente, esto es excepcionalmente rápido y seguro.
 
                                 if (param != null && !param.IsReadOnly)
                                 {

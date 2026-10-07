@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Limpiar Parámetros Nulos" Height="550" Width="550"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize">
+        ResizeMode="CanResize" MinHeight="400" MinWidth="400">
     <Window.Resources>
         <Style TargetType="Button" x:Key="BotonEjecutarStyle">
             <Setter Property="Background" Value="#FF005FB8"/>
@@ -88,7 +88,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="btnToggleTodos" Content="Seleccionar todos" Padding="10,5" Click="ToggleTodos_Click" Grid.Column="0"/>
+            <Button x:Name="btnToggleTodos" Content="Seleccionar todos" Padding="10,5" Click="ToggleTodos_Click" Grid.Column="0" VerticalAlignment="Center"/>
             <TextBlock x:Name="txtContador" Text="0 Parámetros seleccionados" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Column="1" FontWeight="SemiBold"/>
         </Grid>
 
