@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 using System.ComponentModel;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -18,12 +19,17 @@ namespace Riga.LimpiarNulos.Ui
         public List<ParametroItem> ParametrosDisponibles { get; set; }
         private ICollectionView _vistaParametros;
         private bool _todosSeleccionados = false;
+        private bool _guardadoPrevio = false;
 
         public Ventana(UIDocument uidoc)
         {
             InitializeComponent();
             _uidoc = uidoc;
             _doc = uidoc.Document;
+
+            // Efectuar guardado al abrir la herramienta
+            GuardarLocalmente();
+
             CargarParametros();
 
             _vistaParametros = CollectionViewSource.GetDefaultView(ParametrosDisponibles);
@@ -31,6 +37,29 @@ namespace Riga.LimpiarNulos.Ui
             listaParametros.ItemsSource = _vistaParametros;
 
             ActualizarUI();
+        }
+
+        private void GuardarLocalmente()
+        {
+            if (string.IsNullOrEmpty(_doc.PathName))
+            {
+                txtGuardadoInfo.Text = "Aviso: Este proyecto es nuevo y nunca ha sido guardado.";
+                txtGuardadoInfo.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DarkOrange);
+                _guardadoPrevio = false;
+                return;
+            }
+
+            try
+            {
+                _doc.Save();
+                _guardadoPrevio = true;
+                txtGuardadoInfo.Text = "✓ Se ha guardado una copia local del archivo para tu seguridad.";
+            }
+            catch (Exception ex)
+            {
+                txtGuardadoInfo.Text = "⚠ No se pudo guardar automáticamente el archivo local.";
+                txtGuardadoInfo.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            }
         }
 
         private void CargarParametros()
@@ -45,12 +74,16 @@ namespace Riga.LimpiarNulos.Ui
 
                 if (binding != null && definition.GetDataType() == SpecTypeId.Boolean.YesNo)
                 {
+                    // Calcular el % de nulos para este parámetro
+                    string porcentajeTexto = CalcularPorcentajeNulls(binding, definition);
+
                     var item = new ParametroItem
                     {
                         Definicion = definition,
                         Nombre = definition.Name,
                         Binding = binding,
-                        Seleccionado = false // Por defecto desmarcados
+                        Seleccionado = false,
+                        PorcentajeNullsTexto = porcentajeTexto
                     };
                     item.PropertyChanged += Item_PropertyChanged;
                     ParametrosDisponibles.Add(item);
@@ -58,6 +91,54 @@ namespace Riga.LimpiarNulos.Ui
             }
 
             ParametrosDisponibles = ParametrosDisponibles.OrderBy(p => p.Nombre).ToList();
+        }
+
+        private string CalcularPorcentajeNulls(InstanceBinding binding, Definition definition)
+        {
+            int totalElementos = 0;
+            int totalNulos = 0;
+
+            foreach (Category category in binding.Categories)
+            {
+                var elementos = new FilteredElementCollector(_doc)
+                    .OfCategoryId(category.Id)
+                    .WhereElementIsNotElementType()
+                    .ToElements();
+
+                foreach (var elem in elementos)
+                {
+                    try
+                    {
+                        Parameter param = null;
+                        foreach (Parameter p in elem.Parameters)
+                        {
+                            if (p.Definition.Name == definition.Name)
+                            {
+                                param = p;
+                                break;
+                            }
+                        }
+
+                        if (param != null)
+                        {
+                            totalElementos++;
+                            if (!param.HasValue)
+                            {
+                                totalNulos++;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignorar errores en lectura
+                    }
+                }
+            }
+
+            if (totalElementos == 0) return "0% Nulls";
+
+            int porcentaje = (int)Math.Round((double)totalNulos / totalElementos * 100);
+            return $"{porcentaje}% Nulls";
         }
 
         private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -99,28 +180,37 @@ namespace Riga.LimpiarNulos.Ui
 
         private void txtBuscar_TextChanged(object sender, TextChangedEventArgs e)
         {
+            btnBorrarBusqueda.Visibility = string.IsNullOrEmpty(txtBuscar.Text) ?
+                System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
+
             _vistaParametros.Refresh();
 
             if (_vistaParametros.IsEmpty)
             {
-                txtSinResultados.Visibility = Visibility.Visible;
-                listaParametros.Visibility = Visibility.Collapsed;
+                txtSinResultados.Visibility = System.Windows.Visibility.Visible;
+                listaParametros.Visibility = System.Windows.Visibility.Collapsed;
             }
             else
             {
-                txtSinResultados.Visibility = Visibility.Collapsed;
-                listaParametros.Visibility = Visibility.Visible;
+                txtSinResultados.Visibility = System.Windows.Visibility.Collapsed;
+                listaParametros.Visibility = System.Windows.Visibility.Visible;
             }
 
             ActualizarUI();
         }
 
+        private void BorrarBusqueda_Click(object sender, RoutedEventArgs e)
+        {
+            txtBuscar.Text = string.Empty;
+            txtBuscar.Focus();
+        }
+
         private void Fila_Click(object sender, MouseButtonEventArgs e)
         {
-            if (sender is ListViewItem item && item.DataContext is ParametroItem parametro)
+            if (sender is ListBoxItem item && item.DataContext is ParametroItem parametro)
             {
                 parametro.Seleccionado = !parametro.Seleccionado;
-                e.Handled = true; // Prevenir que la lista cambie la selección visual
+                e.Handled = true;
             }
         }
 
@@ -128,11 +218,15 @@ namespace Riga.LimpiarNulos.Ui
         {
             bool nuevoEstado = !_todosSeleccionados;
 
-            // Solo cambiamos los que están visibles en la búsqueda
             foreach (ParametroItem item in _vistaParametros)
             {
                 item.Seleccionado = nuevoEstado;
             }
+        }
+
+        private void DoEvents()
+        {
+            Dispatcher.Invoke(new Action(() => { }), DispatcherPriority.Background);
         }
 
         private void Ejecutar_Click(object sender, RoutedEventArgs e)
@@ -140,34 +234,34 @@ namespace Riga.LimpiarNulos.Ui
             var seleccionados = ParametrosDisponibles.Where(p => p.Seleccionado).ToList();
             if (seleccionados.Count == 0) return;
 
-            // Validar si el documento ha sido guardado al menos una vez
-            if (string.IsNullOrEmpty(_doc.PathName))
-            {
-                MessageBox.Show("Este proyecto nunca ha sido guardado. Por favor, guárdalo al menos una vez antes de limpiar los nulos para evitar pérdidas de avance.",
-                                "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            // Preparar UI para ejecución
+            btnEjecutar.IsEnabled = false;
+            btnCancelar.IsEnabled = false;
+            btnToggleTodos.IsEnabled = false;
+            txtBuscar.IsEnabled = false;
+            listaParametros.IsEnabled = false;
+            btnBorrarBusqueda.IsEnabled = false;
 
-            // Guardar local antes de limpiar
-            try
-            {
-                _doc.Save();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al guardar el documento localmente:\n{ex.Message}\n\nLa limpieza continuará de todas formas.",
-                                "Advertencia de guardado", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+            barraProgreso.Visibility = System.Windows.Visibility.Visible;
+            txtEstadoProceso.Visibility = System.Windows.Visibility.Visible;
 
             int elementosModificados = 0;
             int elementosOmitidos = 0;
+            int totalParametros = seleccionados.Count;
 
             using (var transaccion = new Transaction(_doc, "Limpiar Parámetros Nulos"))
             {
                 transaccion.Start();
 
-                foreach (var parametro in seleccionados)
+                for (int i = 0; i < totalParametros; i++)
                 {
+                    var parametro = seleccionados[i];
+
+                    double porcentaje = (double)i / totalParametros * 100;
+                    barraProgreso.Value = porcentaje;
+                    txtEstadoProceso.Text = $"Limpiando parámetros... ({i + 1}/{totalParametros}: {parametro.Nombre})";
+                    DoEvents();
+
                     foreach (Category category in parametro.Binding.Categories)
                     {
                         var elementos = new FilteredElementCollector(_doc)
@@ -206,10 +300,31 @@ namespace Riga.LimpiarNulos.Ui
                     }
                 }
 
+                barraProgreso.Value = 100;
+                txtEstadoProceso.Text = "Finalizando...";
+                DoEvents();
+
                 transaccion.Commit();
             }
 
+            // Recargar datos para permitir repetir el proceso
+            CargarParametros();
+            _vistaParametros = CollectionViewSource.GetDefaultView(ParametrosDisponibles);
+            _vistaParametros.Filter = FiltroBusqueda;
+            listaParametros.ItemsSource = _vistaParametros;
+
+            // Restaurar UI
+            btnCancelar.IsEnabled = true;
+            btnToggleTodos.IsEnabled = true;
+            txtBuscar.IsEnabled = true;
+            listaParametros.IsEnabled = true;
+            btnBorrarBusqueda.IsEnabled = true;
+            barraProgreso.Visibility = System.Windows.Visibility.Collapsed;
+            txtEstadoProceso.Visibility = System.Windows.Visibility.Collapsed;
+            ActualizarUI();
+
             string mensaje = $"Se han limpiado nulos en {elementosModificados} elementos.\n";
+
             if (elementosOmitidos > 0)
             {
                 mensaje += $"\nAdvertencia: Se omitieron {elementosOmitidos} elementos (Bloqueados, solo lectura o en uso por otro usuario).";
@@ -219,8 +334,7 @@ namespace Riga.LimpiarNulos.Ui
                 mensaje += "\nÉxito total: Todos los elementos nulos en los parámetros seleccionados fueron limpiados sin bloqueos.";
             }
 
-            MessageBox.Show(mensaje, "Resultado", MessageBoxButton.OK, MessageBoxImage.Information);
-            Close();
+            MessageBox.Show(mensaje, "Proceso Completado", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void Cancelar_Click(object sender, RoutedEventArgs e)
@@ -234,6 +348,7 @@ namespace Riga.LimpiarNulos.Ui
         public Definition Definicion { get; set; }
         public InstanceBinding Binding { get; set; }
         public string Nombre { get; set; }
+        public string PorcentajeNullsTexto { get; set; }
 
         private bool _seleccionado;
         public bool Seleccionado
