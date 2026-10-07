@@ -65,6 +65,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <CheckBox Grid.Column="0" IsChecked="{Binding Seleccionado, UpdateSourceTrigger=PropertyChanged}"
@@ -72,6 +73,8 @@
                                           IsHitTestVisible="False"/>
 
                                 <TextBlock Grid.Column="1" Text="{Binding Nombre}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="5,0"/>
+
+                                <TextBlock Grid.Column="2" Text="{Binding PorcentajeNullsTexto}" VerticalAlignment="Center" Foreground="Gray" Margin="10,0,5,0" FontStyle="Italic"/>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
