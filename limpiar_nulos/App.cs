@@ -30,21 +30,29 @@ namespace Riga.LimpiarNulos
                 boton.Image = Comun.Iconos.Escoba(16);
             }
 
-            string dllInyector = dll.Replace("LimpiarNulos.dll", "InyectorDatos.dll");
-            var datosInyector = new PushButtonData(
-                "InyectarDatos", "Inyectar\ndatos", dllInyector, "Riga.InyectorDatos.Comandos.DataInjectorCommand")
+            try
             {
-                ToolTip = "Inyecta datos desde un archivo CSV a parámetros de elementos en Revit.",
-                LongDescription =
-                    "Abre una ventana para seleccionar un archivo CSV y mapear sus columnas a parámetros de Revit. " +
-                    "Inyecta los datos de acuerdo a la clave primaria seleccionada."
-            };
-            var botonInyector = panel.AddItem(datosInyector) as PushButton;
-            if (botonInyector != null)
+                string dllInyector = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dll), "InyectorDatos.dll");
+                var datosInyector = new PushButtonData(
+                    "InyectarDatos", "Inyectar\ndatos", dllInyector, "Riga.InyectorDatos.Comandos.DataInjectorCommand")
+                {
+                    ToolTip = "Inyecta datos desde un archivo CSV a parámetros de elementos en Revit.",
+                    LongDescription =
+                        "Abre una ventana para seleccionar un archivo CSV y mapear sus columnas a parámetros de Revit. " +
+                        "Inyecta los datos de acuerdo a la clave primaria seleccionada."
+                };
+
+                var botonInyector = panel.AddItem(datosInyector) as PushButton;
+                if (botonInyector != null)
+                {
+                    // Commented out images to prevent Ribbon load crashes until icon files are added
+                    // botonInyector.LargeImage = Comun.Iconos.Escoba(32);
+                    // botonInyector.Image = Comun.Iconos.Escoba(16);
+                }
+            }
+            catch (Exception)
             {
-                // Assign placeholder icon using the same brush/icon utility for now
-                botonInyector.LargeImage = Comun.Iconos.Escoba(32);
-                botonInyector.Image = Comun.Iconos.Escoba(16);
+                // Prevent failure of one button from bringing down the whole Ribbon
             }
 
             return Result.Succeeded;
