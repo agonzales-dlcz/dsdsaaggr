@@ -50,9 +50,9 @@ namespace Riga.LimpiarNulos
                     // botonInyector.Image = Comun.Iconos.Escoba(16);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Prevent failure of one button from bringing down the whole Ribbon
+                TaskDialog.Show("Debug Ribbon Error", ex.ToString());
             }
 
             return Result.Succeeded;
