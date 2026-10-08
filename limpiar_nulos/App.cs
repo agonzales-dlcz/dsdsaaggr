@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using Autodesk.Revit.UI;
+using System.Windows.Media.Imaging;
 
 namespace Riga.LimpiarNulos
 {
@@ -26,8 +27,11 @@ namespace Riga.LimpiarNulos
             if (boton != null)
             {
                 boton.AvailabilityClassName = typeof(Comun.ConDocumento).FullName;
-                boton.LargeImage = Comun.Iconos.Escoba(32);
-                boton.Image = Comun.Iconos.Escoba(16);
+                try {
+                    var uri = new Uri("pack://application:,,,/LimpiarNulos;component/icono_nulos.png");
+                    boton.LargeImage = new BitmapImage(uri);
+                    boton.Image = new BitmapImage(uri);
+                } catch { }
             }
 
             try
