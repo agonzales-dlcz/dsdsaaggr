@@ -23,13 +23,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2025.0.0" />
+    <Reference Include="RevitAPI">
+      <HintPath>$(RevitDir)RevitAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>$(RevitDir)RevitAPIUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <None Update="InyectorDatos.addin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\icon_injector.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2025.0.0" />
   </ItemGroup>
 
 </Project>

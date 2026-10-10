@@ -306,16 +306,6 @@ namespace Riga.LimpiarNulos.Ui
 
                         try
                         {
-                            if (_doc.IsWorkshared)
-                            {
-                                CheckoutStatus checkoutStatus = WorksharingUtils.GetCheckoutStatus(_doc, elem.Id);
-                                if (checkoutStatus == CheckoutStatus.OwnedByOtherUser)
-                                {
-                                    elementosOmitidos++;
-                                    continue;
-                                }
-                            }
-
                             Parameter param = elem.LookupParameter(parametro.Nombre);
                             if (param != null && !param.IsReadOnly && !param.HasValue)
                             {
