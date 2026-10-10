@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using Autodesk.Revit.UI;
-using System.Windows.Media.Imaging;
 
 namespace Riga.LimpiarNulos
 {
@@ -27,11 +26,8 @@ namespace Riga.LimpiarNulos
             if (boton != null)
             {
                 boton.AvailabilityClassName = typeof(Comun.ConDocumento).FullName;
-                try {
-                    var uri = new Uri("pack://application:,,,/LimpiarNulos;component/icono_nulos.png");
-                    boton.LargeImage = new BitmapImage(uri);
-                    boton.Image = new BitmapImage(uri);
-                } catch { }
+                boton.LargeImage = Comun.Iconos.Escoba(32);
+                boton.Image = Comun.Iconos.Escoba(16);
             }
 
             try
@@ -49,9 +45,7 @@ namespace Riga.LimpiarNulos
                 var botonInyector = panel.AddItem(datosInyector) as PushButton;
                 if (botonInyector != null)
                 {
-                    // Commented out images to prevent Ribbon load crashes until icon files are added
-                    // botonInyector.LargeImage = Comun.Iconos.Escoba(32);
-                    // botonInyector.Image = Comun.Iconos.Escoba(16);
+                    botonInyector.LargeImage = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/InyectorDatos;component/Resources/icon_injector.jpg", UriKind.Absolute));
                 }
             }
             catch (Exception ex)
