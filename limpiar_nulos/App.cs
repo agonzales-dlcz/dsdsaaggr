@@ -45,6 +45,8 @@ namespace Riga.LimpiarNulos
                 var botonInyector = panel.AddItem(datosInyector) as PushButton;
                 if (botonInyector != null)
                 {
+                    // Force load the assembly into memory so WPF can resolve the Pack URI
+                    Assembly.LoadFrom(dllInyector);
                     botonInyector.LargeImage = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/InyectorDatos;component/Resources/icon_injector.jpg", UriKind.Absolute));
                 }
             }

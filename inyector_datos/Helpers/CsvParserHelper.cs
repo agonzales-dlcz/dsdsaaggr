@@ -26,8 +26,12 @@ namespace Riga.InyectorDatos.Helpers
                 return result;
             }
 
-            // Regex to split on commas not inside quotes
-            var csvSplitRegex = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+            // Detect delimiter dynamically based on the first line
+            char delimiter = lines[0].Contains(";") ? ';' : ',';
+
+            // Regex to split on delimiter not inside quotes
+            string pattern = string.Format("{0}(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", Regex.Escape(delimiter.ToString()));
+            var csvSplitRegex = new Regex(pattern);
 
             // Extract headers
             var headers = csvSplitRegex.Split(lines[0])
