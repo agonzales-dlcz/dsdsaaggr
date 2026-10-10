@@ -9,7 +9,7 @@
     <Nullable>disable</Nullable>
     <!-- Los iconos de la cinta se dibujan con WPF. -->
     <UseWPF>true</UseWPF>
-    <AssemblyName>InyectorDatos</AssemblyName>
+    <AssemblyName>Riga.InyectorDatos</AssemblyName>
     <RootNamespace>Riga.InyectorDatos</RootNamespace>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

@@ -32,7 +32,7 @@ namespace Riga.LimpiarNulos
 
             try
             {
-                string dllInyector = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dll), "InyectorDatos.dll");
+                string dllInyector = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dll), "Riga.InyectorDatos.dll");
                 var datosInyector = new PushButtonData(
                     "InyectarDatos", "Inyectar\ndatos", dllInyector, "Riga.InyectorDatos.Comandos.DataInjectorCommand")
                 {
@@ -45,7 +45,7 @@ namespace Riga.LimpiarNulos
                 var botonInyector = panel.AddItem(datosInyector) as PushButton;
                 if (botonInyector != null)
                 {
-                    botonInyector.LargeImage = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/InyectorDatos;component/Resources/icon_injector.jpg", UriKind.Absolute));
+                    botonInyector.LargeImage = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Riga.InyectorDatos;component/Resources/icon_injector.jpg", UriKind.Absolute));
                 }
             }
             catch (Exception ex)
