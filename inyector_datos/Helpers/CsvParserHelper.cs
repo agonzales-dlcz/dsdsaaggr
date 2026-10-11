@@ -26,12 +26,10 @@ namespace Riga.InyectorDatos.Helpers
                 return result;
             }
 
-            // Detect delimiter dynamically based on the first line
+            // Detect delimiter from the first line dynamically
             char delimiter = lines[0].Contains(";") ? ';' : ',';
-
-            // Regex to split on delimiter not inside quotes
-            string pattern = string.Format("{0}(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", Regex.Escape(delimiter.ToString()));
-            var csvSplitRegex = new Regex(pattern);
+            string pattern = string.Format("{0}(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", System.Text.RegularExpressions.Regex.Escape(delimiter.ToString()));
+            var csvSplitRegex = new System.Text.RegularExpressions.Regex(pattern);
 
             // Extract headers
             var headers = csvSplitRegex.Split(lines[0])

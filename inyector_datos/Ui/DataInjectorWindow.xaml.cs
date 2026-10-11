@@ -237,9 +237,26 @@ namespace Riga.InyectorDatos.Ui
                 t.Start();
 
                 var collector = new FilteredElementCollector(_doc).WhereElementIsNotElementType();
+                int totalElements = collector.GetElementCount();
+                int currentElement = 0;
+
+                // Make progress bar visible before starting
+                InjectionProgressBar.Dispatcher.Invoke(() => {
+                    InjectionProgressBar.Visibility = System.Windows.Visibility.Visible;
+                    InjectionProgressBar.Value = 0;
+                }, System.Windows.Threading.DispatcherPriority.Background);
 
                 foreach (var elem in collector)
                 {
+                    currentElement++;
+
+                    // Update UI every 25 elements or at the very end to avoid performance hits
+                    if (currentElement % 25 == 0 || currentElement == totalElements)
+                    {
+                        InjectionProgressBar.Dispatcher.Invoke(() => {
+                            InjectionProgressBar.Value = ((double)currentElement / totalElements) * 100;
+                        }, System.Windows.Threading.DispatcherPriority.Background);
+                    }
                     // Worksharing Safety: skip elements owned by others
                     if (_doc.IsWorkshared &&
                         WorksharingUtils.GetCheckoutStatus(_doc, elem.Id) == CheckoutStatus.OwnedByOtherUser)

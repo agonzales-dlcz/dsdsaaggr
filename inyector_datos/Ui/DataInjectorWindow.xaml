@@ -24,8 +24,10 @@
             <TextBlock x:Name="TxtCsvPath" Margin="10,0,0,0" VerticalAlignment="Center" FontStyle="Italic"/>
         </StackPanel>
 
-        <!-- Top: Primary Key Config -->
-        <GroupBox Grid.Row="1" Header="Configuración de Clave Primaria (Primary Key)" Margin="0,0,0,10">
+        <!-- Top: Primary Key Config & Instructions -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="Instrucciones: Selecciona la columna del CSV y el parámetro de Revit que servirán como enlace. Luego mapea las columnas de datos que deseas inyectar." TextWrapping="Wrap" Margin="0,0,0,10" FontStyle="Italic" Foreground="#444444"/>
+            <GroupBox Header="Configuración de Clave Primaria">
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -41,6 +43,7 @@
                 <ComboBox Grid.Column="3" x:Name="CmbRevitPrimaryKey"/>
             </Grid>
         </GroupBox>
+        </StackPanel>
 
         <!-- Middle: Mapping Panel -->
         <GroupBox Grid.Row="2" Header="Mapeo de Datos" Margin="0,0,0,10">
@@ -87,7 +90,14 @@
         <TextBlock Grid.Row="3" Text="Vista Previa de CSV:" FontWeight="Bold" Margin="0,0,0,5"/>
         <DataGrid Grid.Row="4" x:Name="CsvDataGrid" AutoGenerateColumns="True" IsReadOnly="True" Margin="0,0,0,10"/>
 
-        <!-- Execute -->
-        <Button Grid.Row="5" Content="Ejecutar Inyección" Width="150" Height="30" HorizontalAlignment="Right" Click="RunInjection_Click" FontWeight="Bold"/>
+        <!-- Execute & Progress -->
+        <Grid Grid.Row="5" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="InjectionProgressBar" Grid.Column="0" Margin="0,0,15,0" Height="25" Minimum="0" Maximum="100" Visibility="Hidden"/>
+            <Button Grid.Column="1" Content="Insertar Datos" Width="150" Height="30" Click="RunInjection_Click" FontWeight="Bold"/>
+        </Grid>
     </Grid>
 </Window>
