@@ -111,3 +111,6 @@ Write-Output '                          Para repartir: comprimi las dos cosas ju
 Write-Output ''
 Write-Output '  Instalar con el script:'
 Write-Output '    powershell -NoProfile -ExecutionPolicy Bypass -File .\instalar.ps1'
+
+# Desbloquear archivos para evitar bloqueos por MotW
+Get-ChildItem -Path $salida -Recurse | Unblock-File -ErrorAction SilentlyContinue
