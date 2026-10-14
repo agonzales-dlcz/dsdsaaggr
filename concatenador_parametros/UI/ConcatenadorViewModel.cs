@@ -72,23 +72,23 @@ namespace Riga.ConcatenadorParametros.UI
         public ICommand QuitarParametroCommand { get; }
         public ICommand EjecutarCommand { get; }
 
-        public enum DialogAction
+        public enum AccionVentana
         {
-            None,
-            Select,
-            Execute
+            Ninguna,
+            Seleccionar,
+            Ejecutar
         }
 
-        public DialogAction CurrentAction { get; set; } = DialogAction.None;
+        public AccionVentana AccionActual { get; set; } = AccionVentana.Ninguna;
 
-        public event Action CloseWindowRequest;
+        public event Action CerrarVentana;
 
         public ConcatenadorViewModel()
         {
             SeleccionarCommand = new RelayCommand(_ =>
             {
-                CurrentAction = DialogAction.Select;
-                CloseWindowRequest?.Invoke();
+                AccionActual = AccionVentana.Seleccionar;
+                CerrarVentana?.Invoke();
             });
 
             AñadirParametroCommand = new RelayCommand(_ => ParametrosOrigenSeleccionados.Add(new ParametroItem()));
@@ -100,8 +100,8 @@ namespace Riga.ConcatenadorParametros.UI
 
             EjecutarCommand = new RelayCommand(_ =>
             {
-                CurrentAction = DialogAction.Execute;
-                CloseWindowRequest?.Invoke();
+                AccionActual = AccionVentana.Ejecutar;
+                CerrarVentana?.Invoke();
             });
 
             // Agregar un parámetro inicial por defecto

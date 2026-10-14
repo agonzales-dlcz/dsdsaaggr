@@ -11,7 +11,7 @@ namespace Riga.ConcatenadorParametros.UI
 
             if (viewModel is ConcatenadorViewModel vm)
             {
-                vm.CloseWindowRequest += () => this.Close();
+                vm.CerrarVentana += () => this.Close();
             }
         }
     }

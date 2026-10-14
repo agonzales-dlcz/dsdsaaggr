@@ -30,17 +30,17 @@ namespace Riga.ConcatenadorParametros.Comandos
 
             while (keepRunning)
             {
-                _vm.CurrentAction = ConcatenadorViewModel.DialogAction.None;
+                _vm.AccionActual = ConcatenadorViewModel.AccionVentana.Ninguna;
 
                 _window = new ConcatenadorWindow(_vm);
                 _window.ShowDialog();
 
-                if (_vm.CurrentAction == ConcatenadorViewModel.DialogAction.None)
+                if (_vm.AccionActual == ConcatenadorViewModel.AccionVentana.Ninguna)
                 {
                     // User closed the window with the X button
                     keepRunning = false;
                 }
-                else if (_vm.CurrentAction == ConcatenadorViewModel.DialogAction.Select)
+                else if (_vm.AccionActual == ConcatenadorViewModel.AccionVentana.Seleccionar)
                 {
                     try
                     {
@@ -57,10 +57,13 @@ namespace Riga.ConcatenadorParametros.Comandos
                         TaskDialog.Show("Error", "Error en la selección: " + ex.Message);
                     }
                 }
-                else if (_vm.CurrentAction == ConcatenadorViewModel.DialogAction.Execute)
+                else if (_vm.AccionActual == ConcatenadorViewModel.AccionVentana.Ejecutar)
                 {
-                    EjecutarConcatenacion();
-                    keepRunning = false;
+                    bool success = EjecutarConcatenacion();
+                    if (success)
+                    {
+                        keepRunning = false;
+                    }
                 }
             }
 
@@ -122,6 +125,12 @@ namespace Riga.ConcatenadorParametros.Comandos
 
         private void ExtraerParametrosDeElementos(List<ElementId> ids)
         {
+            // Preserve selected values to avoid resetting the ComboBoxes
+            var valoresSeleccionados = _vm.ParametrosOrigenSeleccionados
+                .Select(p => p.Valor)
+                .ToList();
+            var valorDestinoSeleccionado = _vm.ParametroDestino;
+
             _vm.ParametrosDisponibles.Clear();
             _vm.ParametrosDestinoDisponibles.Clear();
 
@@ -154,14 +163,32 @@ namespace Riga.ConcatenadorParametros.Comandos
 
             foreach (var el in elementosRepresentativos)
             {
+                // Instance parameters
                 foreach (Parameter p in el.Parameters)
                 {
                     if (p.Definition != null)
                     {
                         hashTodos.Add(p.Definition.Name);
-                        if (!p.IsReadOnly)
+                        if (!p.IsReadOnly && p.StorageType == StorageType.String)
                         {
                             hashDestino.Add(p.Definition.Name);
+                        }
+                    }
+                }
+
+                // Type parameters (for sources only)
+                var typeId = el.GetTypeId();
+                if (typeId != ElementId.InvalidElementId)
+                {
+                    var typeEl = _doc.GetElement(typeId) as ElementType;
+                    if (typeEl != null)
+                    {
+                        foreach (Parameter p in typeEl.Parameters)
+                        {
+                            if (p.Definition != null)
+                            {
+                                hashTodos.Add(p.Definition.Name);
+                            }
                         }
                     }
                 }
@@ -169,16 +196,30 @@ namespace Riga.ConcatenadorParametros.Comandos
 
             foreach (var p in hashTodos.OrderBy(x => x)) _vm.ParametrosDisponibles.Add(p);
             foreach (var p in hashDestino.OrderBy(x => x)) _vm.ParametrosDestinoDisponibles.Add(p);
+
+            // Restore selected values if they still exist
+            for (int i = 0; i < _vm.ParametrosOrigenSeleccionados.Count && i < valoresSeleccionados.Count; i++)
+            {
+                if (valoresSeleccionados[i] != null && _vm.ParametrosDisponibles.Contains(valoresSeleccionados[i]))
+                {
+                    _vm.ParametrosOrigenSeleccionados[i].Valor = valoresSeleccionados[i];
+                }
+            }
+
+            if (valorDestinoSeleccionado != null && _vm.ParametrosDestinoDisponibles.Contains(valorDestinoSeleccionado))
+            {
+                _vm.ParametroDestino = valorDestinoSeleccionado;
+            }
         }
 
-        private void EjecutarConcatenacion()
+        private bool EjecutarConcatenacion()
         {
             try
             {
                 if (string.IsNullOrEmpty(_vm.ParametroDestino))
                 {
                     TaskDialog.Show("Error", "Debe seleccionar un parámetro destino.");
-                    return;
+                    return false;
                 }
 
                 var origenes = _vm.ParametrosOrigenSeleccionados
@@ -189,7 +230,7 @@ namespace Riga.ConcatenadorParametros.Comandos
                 if (!origenes.Any())
                 {
                     TaskDialog.Show("Error", "Debe seleccionar al menos un parámetro de origen.");
-                    return;
+                    return false;
                 }
 
                 List<ElementId> elementosAProcesar;
@@ -199,7 +240,7 @@ namespace Riga.ConcatenadorParametros.Comandos
                 }
                 else
                 {
-                    if (_vm.CategoriaSeleccionada == null) return;
+                    if (_vm.CategoriaSeleccionada == null) return false;
                     elementosAProcesar = new FilteredElementCollector(_doc)
                         .OfCategoryId(_vm.CategoriaSeleccionada.Id)
                         .WhereElementIsNotElementType()
@@ -210,7 +251,7 @@ namespace Riga.ConcatenadorParametros.Comandos
                 if (!elementosAProcesar.Any())
                 {
                     TaskDialog.Show("Info", "No hay elementos para procesar.");
-                    return;
+                    return false;
                 }
 
                 int procesados = 0;
@@ -231,8 +272,9 @@ namespace Riga.ConcatenadorParametros.Comandos
                             if (status == CheckoutStatus.OwnedByOtherUser) continue;
                         }
 
-                        var paramDestino = ObtenerParametroPorNombre(el, _vm.ParametroDestino);
-                        if (paramDestino == null || paramDestino.IsReadOnly) continue;
+                        var paramDestino = el.GetParameters(_vm.ParametroDestino)
+                            .FirstOrDefault(p => !p.IsReadOnly && p.StorageType == StorageType.String);
+                        if (paramDestino == null) continue;
 
                         var valores = new List<string>();
 
@@ -266,10 +308,12 @@ namespace Riga.ConcatenadorParametros.Comandos
                 }
 
                 TaskDialog.Show("Resultado", $"Se actualizaron {procesados} elementos.");
+                return true;
             }
             catch (Exception ex)
             {
                 TaskDialog.Show("Error", "Ocurrió un error al ejecutar: " + ex.Message);
+                return false;
             }
         }
 
@@ -289,11 +333,19 @@ namespace Riga.ConcatenadorParametros.Comandos
 
         private Parameter ObtenerParametroPorNombre(Element el, string nombre)
         {
-            foreach (Parameter p in el.Parameters)
+            var pInstancia = el.GetParameters(nombre).FirstOrDefault(x => x.HasValue)
+                             ?? el.GetParameters(nombre).FirstOrDefault();
+
+            if (pInstancia != null)
+                return pInstancia;
+
+            var typeId = el.GetTypeId();
+            if (typeId != ElementId.InvalidElementId)
             {
-                if (p.Definition != null && p.Definition.Name == nombre)
-                    return p;
+                var typeEl = _doc.GetElement(typeId);
+                return typeEl?.GetParameters(nombre).FirstOrDefault();
             }
+
             return null;
         }
 
