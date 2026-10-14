@@ -71,6 +71,16 @@
     <EmbeddedResource Include="..\limpiar_nulos\bin\Release\LimpiarNulos.deps.json"          LogicalName="paquete/LimpiarNulos.deps.json" />
     <EmbeddedResource Include="..\limpiar_nulos\bin\Release\LimpiarNulos.runtimeconfig.json" LogicalName="paquete/LimpiarNulos.runtimeconfig.json" />
     <EmbeddedResource Include="..\limpiar_nulos\bin\Release\LimpiarNulos.addin"              LogicalName="paquete/LimpiarNulos.addin" />
+
+    <EmbeddedResource Include="..\inyector_datos\bin\Release\InyectorDatos.dll"                LogicalName="paquete/InyectorDatos.dll" />
+    <EmbeddedResource Include="..\inyector_datos\bin\Release\InyectorDatos.deps.json"          LogicalName="paquete/InyectorDatos.deps.json" />
+    <EmbeddedResource Include="..\inyector_datos\bin\Release\InyectorDatos.runtimeconfig.json" LogicalName="paquete/InyectorDatos.runtimeconfig.json" />
+    <EmbeddedResource Include="..\inyector_datos\bin\Release\InyectorDatos.addin"              LogicalName="paquete/InyectorDatos.addin" />
+
+    <EmbeddedResource Include="..\concatenador_parametros\bin\Release\ConcatenadorParametros.dll"                LogicalName="paquete/ConcatenadorParametros.dll" />
+    <EmbeddedResource Include="..\concatenador_parametros\bin\Release\ConcatenadorParametros.deps.json"          LogicalName="paquete/ConcatenadorParametros.deps.json" />
+    <EmbeddedResource Include="..\concatenador_parametros\bin\Release\ConcatenadorParametros.runtimeconfig.json" LogicalName="paquete/ConcatenadorParametros.runtimeconfig.json" />
+    <EmbeddedResource Include="..\concatenador_parametros\bin\Release\ConcatenadorParametros.addin"              LogicalName="paquete/ConcatenadorParametros.addin" />
   </ItemGroup>
 
 </Project>

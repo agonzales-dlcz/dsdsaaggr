@@ -29,7 +29,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-$proyectos = @('sectores', 'vistas', 'guardado', 'exportar_planos', 'exportar_tablas', 'limpiar_nulos', 'inyector_datos')
+$proyectos = @('sectores', 'vistas', 'guardado', 'exportar_planos', 'exportar_tablas', 'limpiar_nulos', 'inyector_datos', 'concatenador_parametros')
 
 foreach ($p in $proyectos) {
     Write-Output "== compilando $p"
@@ -111,3 +111,6 @@ Write-Output '                          Para repartir: comprimi las dos cosas ju
 Write-Output ''
 Write-Output '  Instalar con el script:'
 Write-Output '    powershell -NoProfile -ExecutionPolicy Bypass -File .\instalar.ps1'
+
+# Desbloquear archivos para evitar bloqueos por MotW
+Get-ChildItem -Path $salida -Recurse | Unblock-File -ErrorAction SilentlyContinue
