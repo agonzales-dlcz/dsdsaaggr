@@ -24,13 +24,45 @@ namespace Riga.ConcatenadorParametros.Comandos
             _doc = _uidoc.Document;
 
             _vm = new ConcatenadorViewModel();
-            _vm.SolicitarSeleccion += OnSolicitarSeleccion;
-            _vm.SolicitarEjecucion += OnSolicitarEjecucion;
-
             CargarCategoriasDisponibles();
 
-            _window = new ConcatenadorWindow(_vm);
-            _window.ShowDialog();
+            bool keepRunning = true;
+
+            while (keepRunning)
+            {
+                _vm.CurrentAction = ConcatenadorViewModel.DialogAction.None;
+
+                _window = new ConcatenadorWindow(_vm);
+                _window.ShowDialog();
+
+                if (_vm.CurrentAction == ConcatenadorViewModel.DialogAction.None)
+                {
+                    // User closed the window with the X button
+                    keepRunning = false;
+                }
+                else if (_vm.CurrentAction == ConcatenadorViewModel.DialogAction.Select)
+                {
+                    try
+                    {
+                        var referencias = _uidoc.Selection.PickObjects(ObjectType.Element, "Seleccione elementos para concatenar parámetros (Esc para cancelar)");
+                        _elementosSeleccionados = referencias.Select(r => r.ElementId).ToList();
+                        ExtraerParametrosDeElementos(_elementosSeleccionados);
+                    }
+                    catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                    {
+                        // User pressed Esc. Do nothing, just let the loop continue and reopen the window.
+                    }
+                    catch (Exception ex)
+                    {
+                        TaskDialog.Show("Error", "Error en la selección: " + ex.Message);
+                    }
+                }
+                else if (_vm.CurrentAction == ConcatenadorViewModel.DialogAction.Execute)
+                {
+                    EjecutarConcatenacion();
+                    keepRunning = false;
+                }
+            }
 
             return Result.Succeeded;
         }
@@ -74,22 +106,6 @@ namespace Riga.ConcatenadorParametros.Comandos
                     ExtraerParametrosPorCategoria();
                 }
             };
-        }
-
-        private void OnSolicitarSeleccion()
-        {
-            _window.Hide();
-            try
-            {
-                var referencias = _uidoc.Selection.PickObjects(ObjectType.Element, "Seleccione elementos para concatenar parámetros");
-                _elementosSeleccionados = referencias.Select(r => r.ElementId).ToList();
-                ExtraerParametrosDeElementos(_elementosSeleccionados);
-            }
-            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
-            {
-                // Usuario canceló la selección
-            }
-            _window.ShowDialog();
         }
 
         private void ExtraerParametrosPorCategoria()
@@ -155,100 +171,106 @@ namespace Riga.ConcatenadorParametros.Comandos
             foreach (var p in hashDestino.OrderBy(x => x)) _vm.ParametrosDestinoDisponibles.Add(p);
         }
 
-        private void OnSolicitarEjecucion()
+        private void EjecutarConcatenacion()
         {
-            if (string.IsNullOrEmpty(_vm.ParametroDestino))
+            try
             {
-                TaskDialog.Show("Error", "Debe seleccionar un parámetro destino.");
-                return;
-            }
-
-            var origenes = _vm.ParametrosOrigenSeleccionados
-                .Where(p => !string.IsNullOrEmpty(p.Valor))
-                .Select(p => p.Valor)
-                .ToList();
-
-            if (!origenes.Any())
-            {
-                TaskDialog.Show("Error", "Debe seleccionar al menos un parámetro de origen.");
-                return;
-            }
-
-            List<ElementId> elementosAProcesar;
-            if (_vm.UsarSeleccion)
-            {
-                elementosAProcesar = _elementosSeleccionados;
-            }
-            else
-            {
-                if (_vm.CategoriaSeleccionada == null) return;
-                elementosAProcesar = new FilteredElementCollector(_doc)
-                    .OfCategoryId(_vm.CategoriaSeleccionada.Id)
-                    .WhereElementIsNotElementType()
-                    .ToElementIds()
-                    .ToList();
-            }
-
-            if (!elementosAProcesar.Any())
-            {
-                TaskDialog.Show("Info", "No hay elementos para procesar.");
-                return;
-            }
-
-            int procesados = 0;
-
-            using (var tx = new Transaction(_doc, "Concatenar Parámetros"))
-            {
-                tx.Start();
-
-                foreach (var id in elementosAProcesar)
+                if (string.IsNullOrEmpty(_vm.ParametroDestino))
                 {
-                    var el = _doc.GetElement(id);
-                    if (el == null) continue;
+                    TaskDialog.Show("Error", "Debe seleccionar un parámetro destino.");
+                    return;
+                }
 
-                    // Worksharing check
-                    if (_doc.IsWorkshared)
+                var origenes = _vm.ParametrosOrigenSeleccionados
+                    .Where(p => !string.IsNullOrEmpty(p.Valor))
+                    .Select(p => p.Valor)
+                    .ToList();
+
+                if (!origenes.Any())
+                {
+                    TaskDialog.Show("Error", "Debe seleccionar al menos un parámetro de origen.");
+                    return;
+                }
+
+                List<ElementId> elementosAProcesar;
+                if (_vm.UsarSeleccion)
+                {
+                    elementosAProcesar = _elementosSeleccionados;
+                }
+                else
+                {
+                    if (_vm.CategoriaSeleccionada == null) return;
+                    elementosAProcesar = new FilteredElementCollector(_doc)
+                        .OfCategoryId(_vm.CategoriaSeleccionada.Id)
+                        .WhereElementIsNotElementType()
+                        .ToElementIds()
+                        .ToList();
+                }
+
+                if (!elementosAProcesar.Any())
+                {
+                    TaskDialog.Show("Info", "No hay elementos para procesar.");
+                    return;
+                }
+
+                int procesados = 0;
+
+                using (var tx = new Transaction(_doc, "Concatenar Parámetros"))
+                {
+                    tx.Start();
+
+                    foreach (var id in elementosAProcesar)
                     {
-                        var status = WorksharingUtils.GetCheckoutStatus(_doc, el.Id);
-                        if (status == CheckoutStatus.OwnedByOtherUser) continue;
-                    }
+                        var el = _doc.GetElement(id);
+                        if (el == null) continue;
 
-                    var paramDestino = ObtenerParametroPorNombre(el, _vm.ParametroDestino);
-                    if (paramDestino == null || paramDestino.IsReadOnly) continue;
-
-                    var valores = new List<string>();
-
-                    foreach (var nombre in origenes)
-                    {
-                        string val = null;
-                        if (nombre == "[Categoría]") val = el.Category?.Name;
-                        else if (nombre == "[Familia]") val = ObtenerNombreFamilia(el);
-                        else if (nombre == "[Tipo]") val = el.Name;
-                        else
+                        // Worksharing check
+                        if (_doc.IsWorkshared)
                         {
-                            var p = ObtenerParametroPorNombre(el, nombre);
-                            if (p != null)
+                            var status = WorksharingUtils.GetCheckoutStatus(_doc, el.Id);
+                            if (status == CheckoutStatus.OwnedByOtherUser) continue;
+                        }
+
+                        var paramDestino = ObtenerParametroPorNombre(el, _vm.ParametroDestino);
+                        if (paramDestino == null || paramDestino.IsReadOnly) continue;
+
+                        var valores = new List<string>();
+
+                        foreach (var nombre in origenes)
+                        {
+                            string val = null;
+                            if (nombre == "[Categoría]") val = el.Category?.Name;
+                            else if (nombre == "[Familia]") val = ObtenerNombreFamilia(el);
+                            else if (nombre == "[Tipo]") val = el.Name;
+                            else
                             {
-                                val = ExtraerValorParametro(p);
+                                var p = ObtenerParametroPorNombre(el, nombre);
+                                if (p != null)
+                                {
+                                    val = ExtraerValorParametro(p);
+                                }
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(val))
+                            {
+                                valores.Add(val);
                             }
                         }
 
-                        if (!string.IsNullOrWhiteSpace(val))
-                        {
-                            valores.Add(val);
-                        }
+                        string resultado = string.Join(_vm.Separador ?? "", valores);
+                        paramDestino.Set(resultado);
+                        procesados++;
                     }
 
-                    string resultado = string.Join(_vm.Separador ?? "", valores);
-                    paramDestino.Set(resultado);
-                    procesados++;
+                    tx.Commit();
                 }
 
-                tx.Commit();
+                TaskDialog.Show("Resultado", $"Se actualizaron {procesados} elementos.");
             }
-
-            TaskDialog.Show("Resultado", $"Se actualizaron {procesados} elementos.");
-            _window.Close();
+            catch (Exception ex)
+            {
+                TaskDialog.Show("Error", "Ocurrió un error al ejecutar: " + ex.Message);
+            }
         }
 
         private string ObtenerNombreFamilia(Element el)

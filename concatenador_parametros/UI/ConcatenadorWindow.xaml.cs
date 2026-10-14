@@ -8,6 +8,11 @@ namespace Riga.ConcatenadorParametros.UI
         {
             InitializeComponent();
             DataContext = viewModel;
+
+            if (viewModel is ConcatenadorViewModel vm)
+            {
+                vm.CloseWindowRequest += () => this.Close();
+            }
         }
     }
 }

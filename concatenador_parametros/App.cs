@@ -14,33 +14,40 @@ namespace Riga.ConcatenadorParametros
 
         public Result OnStartup(UIControlledApplication app)
         {
-            try { app.CreateRibbonTab(TAB); } catch { }
-
-            RibbonPanel panel = null;
-            foreach (var p in app.GetRibbonPanels(TAB))
+            try
             {
-                if (p.Name == PANEL) { panel = p; break; }
+                try { app.CreateRibbonTab(TAB); } catch { }
+
+                RibbonPanel panel = null;
+                foreach (var p in app.GetRibbonPanels(TAB))
+                {
+                    if (p.Name == PANEL) { panel = p; break; }
+                }
+                if (panel == null) panel = app.CreateRibbonPanel(TAB, PANEL);
+
+                string dll = Assembly.GetExecutingAssembly().Location;
+
+                var datos = new PushButtonData(
+                    "ConcatenadorParametros", "Concatenador\nde Parámetros", dll,
+                    "Riga.ConcatenadorParametros.Comandos.CmdConcatenadorParametros")
+                {
+                    ToolTip = "Concatena múltiples parámetros en un parámetro de destino.",
+                    LongDescription = "Permite seleccionar elementos o filtrar por categoría para unir los valores de varios parámetros en un único parámetro destino, usando un separador personalizado."
+                };
+
+                var boton = panel.AddItem(datos) as PushButton;
+                if (boton != null)
+                {
+                    boton.LargeImage = CuadradoNegro(32);
+                    boton.Image = CuadradoNegro(16);
+                }
+
+                return Result.Succeeded;
             }
-            if (panel == null) panel = app.CreateRibbonPanel(TAB, PANEL);
-
-            string dll = Assembly.GetExecutingAssembly().Location;
-
-            var datos = new PushButtonData(
-                "ConcatenadorParametros", "Concatenador\nde Parámetros", dll,
-                "Riga.ConcatenadorParametros.Comandos.CmdConcatenadorParametros")
+            catch (Exception)
             {
-                ToolTip = "Concatena múltiples parámetros en un parámetro de destino.",
-                LongDescription = "Permite seleccionar elementos o filtrar por categoría para unir los valores de varios parámetros en un único parámetro destino, usando un separador personalizado."
-            };
-
-            var boton = panel.AddItem(datos) as PushButton;
-            if (boton != null)
-            {
-                boton.LargeImage = CuadradoNegro(32);
-                boton.Image = CuadradoNegro(16);
+                return Result.Failed;
             }
-
-            return Result.Succeeded;
         }
 
         public Result OnShutdown(UIControlledApplication app) { return Result.Succeeded; }

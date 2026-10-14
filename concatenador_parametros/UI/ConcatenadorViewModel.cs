@@ -72,18 +72,37 @@ namespace Riga.ConcatenadorParametros.UI
         public ICommand QuitarParametroCommand { get; }
         public ICommand EjecutarCommand { get; }
 
-        public event Action SolicitarSeleccion;
-        public event Action SolicitarEjecucion;
+        public enum DialogAction
+        {
+            None,
+            Select,
+            Execute
+        }
+
+        public DialogAction CurrentAction { get; set; } = DialogAction.None;
+
+        public event Action CloseWindowRequest;
 
         public ConcatenadorViewModel()
         {
-            SeleccionarCommand = new RelayCommand(_ => SolicitarSeleccion?.Invoke());
+            SeleccionarCommand = new RelayCommand(_ =>
+            {
+                CurrentAction = DialogAction.Select;
+                CloseWindowRequest?.Invoke();
+            });
+
             AñadirParametroCommand = new RelayCommand(_ => ParametrosOrigenSeleccionados.Add(new ParametroItem()));
+
             QuitarParametroCommand = new RelayCommand(p =>
             {
                 if (p is ParametroItem pi) ParametrosOrigenSeleccionados.Remove(pi);
             });
-            EjecutarCommand = new RelayCommand(_ => SolicitarEjecucion?.Invoke());
+
+            EjecutarCommand = new RelayCommand(_ =>
+            {
+                CurrentAction = DialogAction.Execute;
+                CloseWindowRequest?.Invoke();
+            });
 
             // Agregar un parámetro inicial por defecto
             ParametrosOrigenSeleccionados.Add(new ParametroItem());
