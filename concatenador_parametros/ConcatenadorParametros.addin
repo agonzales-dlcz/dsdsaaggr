@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Concatenador de Parámetros</Name>
+    <Assembly>ConcatenadorParametros.dll</Assembly>
+    <AddInId>A1B2C3D4-E5F6-4A7B-8C9D-E0F1A2B3C4D5</AddInId>
+    <FullClassName>Riga.ConcatenadorParametros.App</FullClassName>
+    <VendorId>RIGA</VendorId>
+    <VendorDescription>Riga, www.riga.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>
