@@ -13,11 +13,13 @@ namespace Riga.ExportarTablas
 
         public Result OnStartup(UIControlledApplication app)
         {
-            try { app.CreateRibbonTab(TAB); } catch { }        // ya existe si hay otro addin
+            try { app.CreateRibbonTab(TAB); } catch (Autodesk.Revit.Exceptions.ArgumentException) { }        // ya existe si hay otro addin
 
             RibbonPanel panel = null;
             foreach (var p in app.GetRibbonPanels(TAB))         // comparte panel con el de planos
+            {
                 if (p.Name == PANEL) { panel = p; break; }
+            }
             if (panel == null) panel = app.CreateRibbonPanel(TAB, PANEL);
 
             string dll = Assembly.GetExecutingAssembly().Location;

@@ -16,7 +16,7 @@ namespace Riga.ConcatenadorParametros
         {
             try
             {
-                try { app.CreateRibbonTab(TAB); } catch { }
+                try { app.CreateRibbonTab(TAB); } catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
                 RibbonPanel panel = null;
                 foreach (var p in app.GetRibbonPanels(TAB))

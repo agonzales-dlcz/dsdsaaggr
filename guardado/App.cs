@@ -19,11 +19,13 @@ namespace Riga.Guardado
 
         public Result OnStartup(UIControlledApplication app)
         {
-            try { app.CreateRibbonTab(TAB); } catch { }   // ya existe si arranco otro addin antes
+            try { app.CreateRibbonTab(TAB); } catch (Autodesk.Revit.Exceptions.ArgumentException) { }   // ya existe si arranco otro addin antes
 
             RibbonPanel panel = null;
             foreach (var p in app.GetRibbonPanels(TAB))
+            {
                 if (p.Name == PANEL) { panel = p; break; }
+            }
             if (panel == null) panel = app.CreateRibbonPanel(TAB, PANEL);
 
             string dll = Assembly.GetExecutingAssembly().Location;

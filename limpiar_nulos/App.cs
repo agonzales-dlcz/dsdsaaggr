@@ -7,11 +7,19 @@ namespace Riga.LimpiarNulos
     public class App : IExternalApplication
     {
         const string TAB = "dsdsaaggr";
+        const string PANEL = "Parámetros";
 
         public Result OnStartup(UIControlledApplication app)
         {
-            try { app.CreateRibbonTab(TAB); } catch { }
-            var panel = app.CreateRibbonPanel(TAB, "Parámetros");
+            try { app.CreateRibbonTab(TAB); } catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+
+            RibbonPanel panel = null;
+            foreach (var p in app.GetRibbonPanels(TAB))
+            {
+                if (p.Name == PANEL) { panel = p; break; }
+            }
+            if (panel == null) panel = app.CreateRibbonPanel(TAB, PANEL);
+
             string dll = Assembly.GetExecutingAssembly().Location;
 
             var datos = new PushButtonData(
